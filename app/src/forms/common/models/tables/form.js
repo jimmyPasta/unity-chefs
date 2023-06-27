@@ -95,6 +95,11 @@ class Form extends Timestamps(Model) {
           query.where('active', value);
         }
       },
+      filterGenericTemplate(query, value) {
+        if (value !== undefined) {
+          query.where('genericTemplate', value);
+        }
+      },
       filterLabels(query, value) {
         if (value) {
           query.whereRaw(`'${value}' = ANY (labels)`);

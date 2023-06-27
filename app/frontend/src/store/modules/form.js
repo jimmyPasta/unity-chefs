@@ -186,7 +186,7 @@ export default {
     async getFormsForCurrentUser({ commit, dispatch }) {
       try {
         // Get the forms based on the user's permissions
-        const response = await rbacService.getCurrentUser();
+        const response = await rbacService.getCurrentUser(true, true);
         const data = response.data;
         // Build up the list of forms for the table
         const forms = data.forms.map((f) => ({
@@ -207,6 +207,22 @@ export default {
             consoleError: i18n.t('trans.store.form.getCurrUserFormsErrMsg', {
               error: error,
             }),
+          },
+          { root: true }
+        );
+      }
+    },
+    async getGenericTemplateForms({ commit, dispatch }) {
+      try {
+        // Get the generic template forms
+        const response = await formService.listGenericTemplateForms();
+        commit('SET_FORMLIST', response.data);
+      } catch (error) {
+        dispatch(
+          'notifications/addNotification',
+          {
+            message: 'Failed to get generic template forms',
+            consoleError: 'Failed to get generic template forms',
           },
           { root: true }
         );

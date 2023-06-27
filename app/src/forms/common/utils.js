@@ -43,6 +43,17 @@ const queryUtils = {
     params.active = active;
     return params;
   },
+  defaultNonGenericTemplateOnly: (params) => {
+    if (!params) {
+      params = {};
+    }
+    let genericTemplate = false;
+    if (!typeUtils.isNil(params.genericTemplate)) {      
+      genericTemplate = !falsey(params.genericTemplate);
+    }
+    params.genericTemplate = genericTemplate;
+    return params;
+  },
 };
 
 /**

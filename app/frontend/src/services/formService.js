@@ -521,6 +521,19 @@ export default {
   },
 
   /**
+   * @function listGenericTemplateForms
+   * Read all the generic template forms in the DB
+   * @param {Boolean} active Don't show deleted forms
+   * @param {Boolean} genericTemplate Get generic template forms
+   * @returns {Promise} An axios response
+   */
+  listGenericTemplateForms(active = true, genericTemplate = true) {
+    return appAxios().get(`${ApiRoutes.ADMIN}${ApiRoutes.FORMS}`, {
+      params: { active: active, genericTemplate: genericTemplate },
+    });
+  },
+
+  /**
    * @function getPresignedUrl
    * get signed image upload url
    * @param {Object} imageName component name and component image encoded into base64

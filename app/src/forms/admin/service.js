@@ -14,7 +14,10 @@ const service = {
    * @returns {Promise} An objection query promise
    */
   listForms: async (params) => {
-    params = queryUtils.defaultActiveOnly(params);
+    params = queryUtils.defaultActiveOnly(params);   
+    if (params.genericTemplate) {
+      return listGenericTemplateForms(params);
+    } 
     return Form.query()
       .modify('filterActive', params.active)
       .allowGraph('[identityProviders,versions]')
@@ -23,6 +26,16 @@ const service = {
       .modify('orderNameAscending');
   },
 
+  listGenericTemplateForms: (params) => {    
+    params = queryUtils.defaultNonGenericTemplateOnly(params);
+    return Form.query()
+      .modify('filterActive', params.active)
+      .modify('filterGenericTemplate', params.genericTemplate)
+      .allowGraph('[identityProviders,versions]')
+      .withGraphFetched('identityProviders(orderDefault)')
+      .withGraphFetched('versions(selectWithoutSchema, orderVersionDescending)')
+      .modify('orderNameAscending');
+  },
   /**
    * @function readVersion
    * Find a form version entry

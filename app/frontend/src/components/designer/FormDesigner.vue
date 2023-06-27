@@ -65,6 +65,15 @@
       <p class="my-0" v-html="$t('trans.formDesigner.formDesignInfoA')"></p>
       <p class="my-0" v-html="$t('trans.formDesigner.formDesignInfoB')"></p>
     </BaseInfoCard>
+    <v-container>
+      <v-select
+        v-model="selectedOption"
+        :items="formList"
+        item-text="name"
+        label="Load A Generic Form Template"
+      ></v-select>
+      <p>Selected option: {{ selectedOption }}</p>
+    </v-container>
     <FormBuilder
       :form="formSchema"
       :key="reRenderFormIo"
@@ -175,6 +184,13 @@ export default {
       showHelpLinkDialog: false,
       component: {},
       isComponentRemoved: false,
+      options: [
+        { id: 1, name: 'Option 1' },
+        { id: 2, name: 'Option 2' },
+        { id: 3, name: 'Option 3' },
+        { id: 4, name: 'Option 4' },
+      ],
+      selectedOption: null,
     };
   },
 
@@ -184,6 +200,7 @@ export default {
       'fcProactiveHelpImageUrl',
       'multiLanguage',
       'builder',
+      'formList',
     ]),
     ...mapGetters('auth', ['tokenParsed', 'user']),
     ...mapFields('form', [
@@ -315,6 +332,7 @@ export default {
       'fetchForm',
       'setDirtyFlag',
       'getFCProactiveHelpImageUrl',
+      'getGenericTemplateForms',
     ]),
     ...mapActions('notifications', ['addNotification']),
 
@@ -401,6 +419,7 @@ export default {
     // ---------------------------------------------------------------------------------------------------
     init() {
       this.setDirtyFlag(false);
+      this.getGenericTemplateForms();
       // Since change is triggered during loading
       this.onFormLoad();
     },
