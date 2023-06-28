@@ -40,16 +40,23 @@ const service = {
 
   listForms: async (params) => {
     params = queryUtils.defaultActiveOnly(params);
-    let forms = Form.query()
+    return Form.query()
       .modify('filterActive', params.active)
       .allowGraph('[identityProviders,versions]')
       .withGraphFetched('identityProviders(orderDefault)')
       .withGraphFetched('versions(selectWithoutSchema, orderVersionDescending)')
       .modify('orderNameAscending');
-    if (params.genericTemplate) {
-      forms = forms.modify('filterGenericTemplate', params.genericTemplate);
-    }
-    return forms;
+  },
+
+  listGenericTemplateForms: async (params) => {
+    params = queryUtils.defaultActiveOnly(params);
+    return Form.query()
+      .modify('filterActive', params.active)      
+      .allowGraph('[identityProviders,versions]')
+      .withGraphFetched('identityProviders(orderDefault)')
+      .withGraphFetched('versions(selectWithoutSchema, orderVersionDescending)')
+      .modify('orderNameAscending')
+      .modify('filterGenericTemplate', params.genericTemplate);
   },
 
   createForm: async (data, currentUser) => {

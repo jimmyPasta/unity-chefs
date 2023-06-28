@@ -35,6 +35,14 @@ module.exports = {
       next(error);
     }
   },
+  listGenericTemplateForms: async (req, res, next) => {
+    try {
+      const response = await service.listGenericTemplateForms(req.query);
+      res.status(200).json(response);
+    } catch (error) {
+      next(error);
+    }
+  },
   createForm: async (req, res, next) => {
     try {
       const response = await service.createForm(req.body, req.currentUser);

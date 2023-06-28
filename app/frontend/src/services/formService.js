@@ -528,7 +528,7 @@ export default {
    * @returns {Promise} An axios response
    */
   listGenericTemplateForms(active = true, genericTemplate = true) {
-    return appAxios().get(`${ApiRoutes.FORMS}`, {
+    return appAxios().get(`${ApiRoutes.FORMS}/generic`, {
       params: { active: active, genericTemplate: genericTemplate },
     });
   },

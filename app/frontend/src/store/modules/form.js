@@ -218,6 +218,7 @@ export default {
         const response = await formService.listGenericTemplateForms();
         commit('SET_FORMLIST', response.data);
       } catch (error) {
+        commit('SET_FORMLIST', []);
         dispatch(
           'notifications/addNotification',
           {

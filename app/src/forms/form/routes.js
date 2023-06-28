@@ -14,6 +14,10 @@ routes.get('/', keycloak.protect(`${config.get('server.keycloak.clientId')}:admi
   await controller.listForms(req, res, next);
 });
 
+routes.get('/generic', async (req, res, next) => {
+  await controller.listGenericTemplateForms(req, res, next);
+});
+
 routes.post('/', async (req, res, next) => {
   await controller.createForm(req, res, next);
 });
