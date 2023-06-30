@@ -72,7 +72,7 @@ export default {
         data: {},
       },
     },
-
+    genericForm: genInitialForm(),
     permissions: [],
     roles: [],
     submissionList: [],
@@ -97,6 +97,7 @@ export default {
     formFields: (state) => state.formFields,
     formList: (state) => state.formList,
     formSubmission: (state) => state.formSubmission,
+    genericForm: (state) => state.genericForm,
     permissions: (state) => state.permissions,
     roles: (state) => state.roles,
     submissionList: (state) => state.submissionList,
@@ -127,6 +128,9 @@ export default {
     },
     SET_FORM(state, form) {
       state.form = form;
+    },
+    SET_GENERIC_FORM(state, genericForm) {
+      state.genericForm = genericForm;
     },
     SET_FORM_FIELDS(state, formFields) {
       state.formFields = formFields;
@@ -382,6 +386,53 @@ export default {
           {
             message: i18n.t('trans.store.form.fecthDraftErrMsg'),
             consoleError: i18n.t('trans.store.form.fecthDraftConsErrMsg', {
+              formId: formId,
+              error: error,
+            }),
+          },
+          { root: true }
+        );
+      }
+    },
+    async fetchGenericFormDrafts({ commit, dispatch }, formId) {
+      try {
+        // Get any drafts for this form from the api
+        const { data } = await formService.listGenericFormDrafts(formId);
+        commit('SET_DRAFTS', data);
+      } catch (error) {
+        dispatch(
+          'notifications/addNotification',
+          {
+            message: i18n.t('trans.store.form.fecthDraftErrMsg'),
+            consoleError: i18n.t('trans.store.form.fecthDraftConsErrMsg', {
+              formId: formId,
+              error: error,
+            }),
+          },
+          { root: true }
+        );
+      }
+    },
+    async fetchGenericForm({ commit, dispatch }, formId) {
+      try {
+        // Get the form definition from the api
+        const { data } = await formService.readGenericForm(formId);
+        const identityProviders = parseIdps(data.identityProviders);
+        data.idps = identityProviders.idps;
+        data.userType = identityProviders.userType;
+        data.sendSubRecieviedEmail =
+          data.submissionReceivedEmails && data.submissionReceivedEmails.length;
+        data.schedule = {
+          ...genInitialSchedule(),
+          ...data.schedule,
+        };
+        commit('SET_GENERIC_FORM', data);
+      } catch (error) {
+        dispatch(
+          'notifications/addNotification',
+          {
+            message: i18n.t('trans.store.form.fecthFormErrMsg'),
+            consoleError: i18n.t('trans.store.form.fecthFormErrMsg', {
               formId: formId,
               error: error,
             }),

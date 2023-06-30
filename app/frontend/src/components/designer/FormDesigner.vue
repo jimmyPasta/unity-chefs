@@ -69,10 +69,15 @@
       <v-select
         v-model="selectedOption"
         :items="formList"
-        item-text="name"
-        label="Load A Generic Form Template"
-      ></v-select>
-      <p>Selected option: {{ selectedOption }}</p>
+        :item-text="(item) => `${item.name}`"
+        label="Select Generic Form Template"
+      >
+      </v-select>
+      <v-btn :disabled="!selectedOption" @click="loadGenericTemplate">
+        Load Generic Template
+      </v-btn>
+      <br />
+      <br />
     </v-container>
     <FormBuilder
       :form="formSchema"
@@ -184,12 +189,6 @@ export default {
       showHelpLinkDialog: false,
       component: {},
       isComponentRemoved: false,
-      options: [
-        { id: 1, name: 'Option 1' },
-        { id: 2, name: 'Option 2' },
-        { id: 3, name: 'Option 3' },
-        { id: 4, name: 'Option 4' },
-      ],
       selectedOption: null,
     };
   },
@@ -201,6 +200,8 @@ export default {
       'multiLanguage',
       'builder',
       'formList',
+      'genericForm',
+      'drafts',
     ]),
     ...mapGetters('auth', ['tokenParsed', 'user']),
     ...mapFields('form', [
@@ -330,6 +331,8 @@ export default {
   methods: {
     ...mapActions('form', [
       'fetchForm',
+      'fetchGenericForm',
+      'fetchGenericFormDrafts',
       'setDirtyFlag',
       'getFCProactiveHelpImageUrl',
       'getGenericTemplateForms',
@@ -337,6 +340,26 @@ export default {
     ...mapActions('notifications', ['addNotification']),
 
     // TODO: Put this into vuex form module
+    async loadGenericTemplate() {
+      const selected = this.formList.find(
+        (option) => option.name === this.selectedOption
+      );
+      if (selected) {
+        alert('Selected Option Id:' + selected.id);
+      }
+      await this.fetchGenericForm(selected.id);
+      await this.fetchGenericFormDrafts(selected.id);
+      if (this.genericForm.versions) {
+        alert('versions:' + this.genericForm.versions.length);
+      } else {
+        alert('no versions');
+      }
+      if (this.drafts) {
+        alert('drafts:' + this.drafts.length);
+      } else {
+        alert('no drafts');
+      }
+    },
     async getFormSchema() {
       try {
         let res;

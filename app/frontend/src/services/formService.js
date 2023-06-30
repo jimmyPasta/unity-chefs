@@ -17,6 +17,16 @@ export default {
   },
 
   /**
+   * @function readGenericForm
+   * Get the baseline form metadata
+   * @param {string} formId The form uuid of the generic form
+   * @returns {Promise} An axios response
+   */
+  readGenericForm(formId) {
+    return appAxios().get(`${ApiRoutes.FORMS}/generic/${formId}`);
+  },
+
+  /**
    * @function createForm
    * Create a new Form
    * @param {Object} formData An object containing the form details
@@ -103,6 +113,16 @@ export default {
    */
   listDrafts(formId) {
     return appAxios().get(`${ApiRoutes.FORMS}/${formId}/drafts`);
+  },
+
+  /**
+   * @function listGenericFormDrafts
+   * Get any drafts for a generic form template
+   * @param {string} formId The form uuid
+   * @returns {Promise} An axios response
+   */
+  listGenericFormDrafts(formId) {
+    return appAxios().get(`${ApiRoutes.FORMS}/${formId}/generic/drafts`);
   },
 
   /**

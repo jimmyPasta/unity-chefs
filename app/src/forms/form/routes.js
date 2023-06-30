@@ -26,6 +26,10 @@ routes.get('/:formId', apiAccess, hasFormPermissions(P.FORM_READ), async (req, r
   await controller.readForm(req, res, next);
 });
 
+routes.get('/generic/:formId', async (req, res, next) => {
+  await controller.readForm(req, res, next);
+});
+
 routes.get('/:formId/export', apiAccess, hasFormPermissions([P.FORM_READ, P.SUBMISSION_READ]), async (req, res, next) => {
   await controller.export(req, res, next);
 });
@@ -103,6 +107,10 @@ routes.get('/:formId/versions/:formVersionId/submissions/discover', apiAccess, h
 // });
 
 routes.get('/:formId/drafts', apiAccess, hasFormPermissions([P.FORM_READ, P.DESIGN_READ]), async (req, res, next) => {
+  await controller.listDrafts(req, res, next);
+});
+
+routes.get('/:formId/generic/drafts', async (req, res, next) => {
   await controller.listDrafts(req, res, next);
 });
 
