@@ -66,6 +66,10 @@ routes.get('/:formId/versions/:formVersionId', apiAccess, hasFormPermissions([P.
   await controller.readVersion(req, res, next);
 });
 
+routes.get('/generic/:formId/versions/:formVersionId', async (req, res, next) => {
+  await controller.readVersion(req, res, next);
+});
+
 routes.get('/:formId/versions/:formVersionId/fields', apiAccess, hasFormPermissions([P.FORM_READ]), async (req, res, next) => {
   await controller.readVersionFields(req, res, next);
 });
@@ -110,7 +114,7 @@ routes.get('/:formId/drafts', apiAccess, hasFormPermissions([P.FORM_READ, P.DESI
   await controller.listDrafts(req, res, next);
 });
 
-routes.get('/:formId/generic/drafts', async (req, res, next) => {
+routes.get('/generic/:formId/drafts', async (req, res, next) => {
   await controller.listDrafts(req, res, next);
 });
 
@@ -119,6 +123,10 @@ routes.post('/:formId/drafts', apiAccess, hasFormPermissions([P.FORM_READ, P.DES
 });
 
 routes.get('/:formId/drafts/:formVersionDraftId', apiAccess, hasFormPermissions([P.FORM_READ, P.DESIGN_READ]), async (req, res, next) => {
+  await controller.readDraft(req, res, next);
+});
+
+routes.get('/generic/:formId/drafts/:formVersionDraftId', async (req, res, next) => {
   await controller.readDraft(req, res, next);
 });
 

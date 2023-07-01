@@ -220,7 +220,16 @@ export default {
       'form.versions',
       'form.isDirty',
     ]),
-
+    hasDraft() {
+      return this.drafts && this.drafts.length > 0;
+    },
+    hasGenericTemplateVersion() {
+      return (
+        this.genericForm &&
+        this.genericForm.versions &&
+        this.genericForm.versions.length > 0
+      );
+    },
     ID_MODE() {
       return IdentityMode;
     },
@@ -341,23 +350,52 @@ export default {
 
     // TODO: Put this into vuex form module
     async loadGenericTemplate() {
-      const selected = this.formList.find(
-        (option) => option.name === this.selectedOption
-      );
-      if (selected) {
-        alert('Selected Option Id:' + selected.id);
-      }
-      await this.fetchGenericForm(selected.id);
-      await this.fetchGenericFormDrafts(selected.id);
-      if (this.genericForm.versions) {
-        alert('versions:' + this.genericForm.versions.length);
-      } else {
-        alert('no versions');
-      }
-      if (this.drafts) {
-        alert('drafts:' + this.drafts.length);
-      } else {
-        alert('no drafts');
+      try {
+        const selected = this.formList.find(
+          (option) => option.name === this.selectedOption
+        );
+        await this.fetchGenericForm(selected.id);
+        await this.fetchGenericFormDrafts(selected.id);
+
+        let res;
+        if (this.hasGenericTemplateVersion) {
+          this.genericForm.versions.sort((a, b) => {
+            return a.version - b.version;
+          });
+          let version =
+            this.genericForm.versions[this.genericForm.versions.length - 1];
+          res = await formService.readGenericTemplateVersion(
+            version.formId,
+            version.id
+          );
+        } else if (this.hasDraft) {
+          let draft = this.drafts[this.drafts.length - 1];
+          res = await formService.readGenericTemplateDraft(
+            draft.formId,
+            draft.id
+          );
+        } else {
+          this.addNotification({
+            message: 'No version or draft found for this generic form template',
+            consoleError:
+              'No version or draft found for this generic form template',
+          });
+          return;
+        }
+        this.formSchema = { ...this.formSchema, ...res.data.schema };
+        this.addPatchToHistory();
+        this.patch.undoClicked = false;
+        this.patch.redoClicked = false;
+        this.resetHistoryFlags();
+        // Key-changing to force a re-render of the formio component when we want to load a new schema after the page is already in
+        this.reRenderFormIo += 1;
+      } catch (error) {
+        this.addNotification({
+          message:
+            'Error occurred while loading generic template:' + error.stack,
+          consoleError:
+            'Error occurred while loading generic template:' + error.stack,
+        });
       }
     },
     async getFormSchema() {

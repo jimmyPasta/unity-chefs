@@ -122,7 +122,7 @@ export default {
    * @returns {Promise} An axios response
    */
   listGenericFormDrafts(formId) {
-    return appAxios().get(`${ApiRoutes.FORMS}/${formId}/generic/drafts`);
+    return appAxios().get(`${ApiRoutes.FORMS}/generic/${formId}/drafts`);
   },
 
   /**
@@ -148,6 +148,19 @@ export default {
   readDraft(formId, formVersionDraftId) {
     return appAxios().get(
       `${ApiRoutes.FORMS}/${formId}/drafts/${formVersionDraftId}`
+    );
+  },
+
+  /**
+   * @function readGenericTemplateDraft
+   * Get a specific draft for a generic form template
+   * @param {string} formId The form uuid
+   * @param {string} formVersionDraftId The draft uuid
+   * @returns {Promise} An axios response
+   */
+  readGenericTemplateDraft(formId, formVersionDraftId) {
+    return appAxios().get(
+      `${ApiRoutes.FORMS}/generic/${formId}/drafts/${formVersionDraftId}`
     );
   },
 
@@ -190,6 +203,19 @@ export default {
   readVersion(formId, formVersionId) {
     return appAxios().get(
       `${ApiRoutes.FORMS}/${formId}/versions/${formVersionId}`
+    );
+  },
+
+  /**
+   * @function readGenericTemplateVersion
+   * Get a specific form version schema of a generic form template
+   * @param {string} formId The form uuid
+   * @param {string} formVersionId The form version uuid
+   * @returns {Promise} An axios response
+   */
+  readGenericTemplateVersion(formId, formVersionId) {
+    return appAxios().get(
+      `${ApiRoutes.FORMS}/generic/${formId}/versions/${formVersionId}`
     );
   },
 
