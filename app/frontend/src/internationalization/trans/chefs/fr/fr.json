@@ -68,7 +68,22 @@
     "status": "Statut",
     "update": "Mise à jour",
     "cancel": "Annuler",
-    "eventSubscription": "Abonnement à l'événement"
+    "eventSubscription": "Abonnement à l'événement",
+    "cdogsTemplate": "Modèle CDOGS"
+  },
+  "documentTemplate": {
+    "uploadTemplate": "Télécharger le modèle CDOGS",
+    "uploadTemplateFile": "Télécharger le fichier modèle",
+    "upload": "Télécharger",
+    "delete": "Supprimer",
+    "download": "Télécharger",
+    "invalidFileMessage": "Le modèle doit utiliser l'une des extensions suivantes : .txt, .docx, .html, .odt, .pptx, .xlsx, .pdf",
+    "uploadSuccess": "Modèle téléchargé avec succès.",
+    "uploadError": "Une erreur s'est produite lors du téléchargement du modèle.",
+    "deleteSuccess": "Modèle supprimé avec succès.",
+    "deleteError": "Une erreur s'est produite lors de la suppression du modèle.",
+    "fetchError": "Une erreur s'est produite lors de la récupération du modèle.",
+    "info": "Téléchargez un modèle pour utiliser le Service de Génération de Documents Communs (CDOGS)"
   },
   "formSettings": {
     "pressToAddMultiEmail": "Appuyez sur <kbd>entrée</kbd> ou <kbd>,</kbd> ou <kbd>espace</kbd> pour ajouter plusieurs adresses e-mail",
@@ -150,7 +165,8 @@
     "allowEventSubscription": "Autoriser l'abonnement aux événements",
     "eventSubscription": "Abonnement à l'événement",
     "validEndpointRequired": "Veuillez saisir un point de terminaison valide commençant par https://",
-    "validBearerTokenRequired": "Saisissez un exemple de jeton de support valide : 89abddfb-2cff-4fda-83e6-13221f0c3d4f"
+    "validBearerTokenRequired": "Saisissez un exemple de jeton de support valide : 89abddfb-2cff-4fda-83e6-13221f0c3d4f",
+    "wideFormLayout": "Disposition large du formulaire"
   },
   "formProfile": {
     "message": "L'équipe CHEFS collecte et organise des informations pour servir de contribution cruciale à l'élaboration de cas d'affaires complets. Ces cas joueront un rôle central dans la direction des opérations stratégiques et l'amélioration continue de CHEFS au cours des prochaines années. Cette initiative de collecte de données est essentielle pour éclairer les décisions critiques et façonner la trajectoire de CHEFS, assurant son adaptabilité et son efficacité face aux besoins et aux défis en constante évolution.",
@@ -379,7 +395,7 @@
     "401NotAuthorized": "401 : non autorisé. :",
     "401ErrorMsg": "Votre compte n&#39;est pas configuré correctement.<br /> S&#39;il vous plaît contactez",
     "403Forbidden": "403 : Interdit. :",
-    "403ErrorMsg": "Cette page nécessite une authentification {idp}.",
+    "403ErrorMsg": "Cette page nécessite une authentification {permission}.",
     "401UnAuthorized": "401 : non autorisé. :",
     "401UnAuthorizedErrMsg": "Vous n'avez pas la permission d'accéder à cette page."
   },
@@ -584,7 +600,8 @@
     "fetchConsoleErrMsg": "Erreur lors de l'ajout de la note :",
     "notes": "Remarques",
     "note": "Note",
-    "maxChars": "4000 caractères maximum"
+    "maxChars": "4000 caractères maximum",
+    "totalNotes": "Notes Totales:"
   },
   "statusPanel": {
     "currentStatus": "Statut actuel:",
@@ -674,7 +691,15 @@
     "docGrnSucess": "Document généré avec succès",
     "failedDocGenErrMsg": "Échec de la génération du document",
     "failedDocGenConsErrMsg": "Erreur lors de l'envoi du modèle : {error}",
-    "cDogsTemplate": "Modèle CDOGS"
+    "cDogsTemplate": "Modèle CDOGS",
+    "uploadCdogsTemplate": "Télécharger le modèle CDOGS",
+    "printOptions": "Options d'impression",
+    "expandtextFields": "Étendre les champs de texte",
+    "moreInfo": "Plus d'infos",
+    "defaultCdogsTemplate": "Utiliser le modèle CDOGS par défaut",
+    "fileName": "Nom de fichier",
+    "uploadDate": "Date de téléchargement",
+    "upload": "Télécharger"
   },
   "proactiveHelpDialog": {
     "componentInfoLink": "Lien d'informations sur les composants",
@@ -880,7 +905,8 @@
     "saveAsADraft": "Enregistrer en tant que projet",
     "editThisDraft": "Modifier ce brouillon",
     "switchSingleSubmssn": "Passer à la soumission unique",
-    "switchMultiSubmssn": "Passer à plusieurs soumissions"
+    "switchMultiSubmssn": "Passer à plusieurs soumissions",
+    "wideLayout": "Mise en page large"
   },
   "baseCopyToClipboard": {
     "linkToClipboard": "Lien copié dans le presse-papiers",

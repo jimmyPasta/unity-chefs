@@ -986,10 +986,11 @@ export default {
         this.saveDraftState = 0;
         if (
           (this.submissionId == undefined || this.formDataEntered) &&
-          this.showModal
-        )
+          this.showModal &&
+          this.form.enableSubmitterDraft
+        ) {
           this.doYouWantToSaveTheDraft = true;
-        else this.leaveThisPage();
+        } else this.leaveThisPage();
       } else {
         this.leaveThisPage();
       }
@@ -1098,6 +1099,7 @@ export default {
               :read-only="readOnly"
               :submission="submission"
               :submission-id="submissionId"
+              :wide-form-layout="form.wideFormLayout"
               class="d-print-none"
               @showdoYouWantToSaveTheDraftModal="
                 showdoYouWantToSaveTheDraftModal

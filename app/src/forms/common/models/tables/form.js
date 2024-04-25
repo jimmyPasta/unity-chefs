@@ -31,7 +31,6 @@ class Form extends Timestamps(Model) {
   }
 
   static get relationMappings() {
-    const FormIdentityProvider = require('./formIdentityProvider');
     const FormVersion = require('./formVersion');
     const FormVersionDraft = require('./formVersionDraft');
     const IdentityProvider = require('./identityProvider');
@@ -45,12 +44,16 @@ class Form extends Timestamps(Model) {
         },
       },
       idpHints: {
-        relation: Model.HasManyRelation,
-        modelClass: FormIdentityProvider,
-        filter: (query) => query.select('code'),
+        relation: Model.ManyToManyRelation,
+        modelClass: IdentityProvider,
+        filter: (query) => query.select('idp'),
         join: {
           from: 'form.id',
-          to: 'form_identity_provider.formId',
+          through: {
+            from: 'form_identity_provider.formId',
+            to: 'form_identity_provider.code',
+          },
+          to: 'identity_provider.code',
         },
       },
       identityProviders: {
@@ -119,10 +122,12 @@ class Form extends Timestamps(Model) {
       'active',
       'allowSubmitterToUploadFile',
       'showSubmissionConfirmation',
+      'enableDocumentTemplates',
       'enableStatusUpdates',
       'schedule',
       'subscribe',
       'reminder_enabled',
+      'wideFormLayout',
       'createdBy',
       'createdAt',
       'updatedBy',
@@ -148,11 +153,13 @@ class Form extends Timestamps(Model) {
         sendSubmissionReceivedEmail: { type: 'boolean' },
         showSubmissionConfirmation: { type: 'boolean' },
         submissionReceivedEmails: { type: ['array', 'null'], items: { type: 'string', pattern: Regex.EMAIL } },
+        enableDocumentTemplates: { type: 'boolean' },
         enableStatusUpdates: { type: 'boolean' },
         enableSubmitterDraft: { type: 'boolean' },
         schedule: { type: 'object' },
         subscribe: { type: 'object' },
         reminder_enabled: { type: 'boolean' },
+        wideFormLayout: { type: 'boolean' },
         enableCopyExistingSubmission: { type: 'boolean' },
         deploymentLevel: { type: 'string', minLength: 1, maxLength: 25 },
         ministry: { type: 'string', minLength: 1, maxLength: 25 },

@@ -68,7 +68,22 @@
     "status": "Status",
     "update": "Atualizar",
     "cancel": "Cancelar",
-    "eventSubscription": "Assinatura de evento"
+    "eventSubscription": "Assinatura de evento",
+    "cdogsTemplate": "modelo CDOGS"
+  },
+  "documentTemplate": {
+    "uploadTemplate": "Carregar modelo CDOGS",
+    "uploadTemplateFile": "Carregar arquivo de modelo",
+    "upload": "Carregar",
+    "delete": "Excluir",
+    "download": "Baixar",
+    "invalidFileMessage": "O modelo deve usar uma das seguintes extensões: .txt, .docx, .html, .odt, .pptx, .xlsx, .pdf",
+    "uploadSuccess": "Modelo carregado com sucesso.",
+    "uploadError": "Ocorreu um erro ao carregar o modelo.",
+    "deleteSuccess": "Modelo excluído com sucesso.",
+    "deleteError": "Ocorreu um erro ao excluir o modelo.",
+    "fetchError": "Ocorreu um erro ao buscar o modelo.",
+    "info": "Carregue um modelo para usar o Serviço de Geração de Documentos Comuns (CDOGS)"
   },
   "formSettings": {
     "pressToAddMultiEmail": "Pressione <kbd>enter</kbd> ou <kbd>,</kbd> ou <kbd>espaço</kbd> para adicionar vários endereços de e-mail",
@@ -150,7 +165,8 @@
     "allowEventSubscription": "Permitir assinatura de evento",
     "eventSubscription": "Assinatura de evento",
     "validEndpointRequired": "Insira um endpoint válido começando com https://",
-    "validBearerTokenRequired": "Insira um exemplo de token de portador válido: 89abddfb-2cff-4fda-83e6-13221f0c3d4f"
+    "validBearerTokenRequired": "Insira um exemplo de token de portador válido: 89abddfb-2cff-4fda-83e6-13221f0c3d4f",
+    "wideFormLayout": "Layout de Formulário Amplo"
   },
   "formProfile": {
   "message": "A equipe CHEFS está coletando e organizando informações para servir como entrada crucial para a criação de casos de negócios abrangentes. Esses casos desempenharão um papel fundamental na orientação da operação estratégica e na melhoria contínua do CHEFS nos próximos anos. Essa iniciativa de coleta de dados é essencial para informar decisões críticas e moldar a trajetória do CHEFS, garantindo sua adaptabilidade e eficácia em lidar com necessidades e desafios em evolução.",
@@ -379,7 +395,7 @@
     "401NotAuthorized": "401: não autorizado. :",
     "401ErrorMsg": "Sua conta não está configurada corretamente.<br /> Por favor entre em contato",
     "403Forbidden": "403: Proibido. :",
-    "403ErrorMsg": "Esta página requer autenticação {idp}.",
+    "403ErrorMsg": "Esta página requer autenticação {permission}.",
     "401UnAuthorized": "401 não autorizado. :",
     "401UnAuthorizedErrMsg": "Você não tem permissão para acessar esta página."
   },
@@ -584,7 +600,8 @@
     "fetchConsoleErrMsg": "Erro ao adicionar nota:",
     "notes": "Notas",
     "note": "Observação",
-    "maxChars": "Máximo de 4.000 caracteres"
+    "maxChars": "Máximo de 4.000 caracteres",
+    "totalNotes": "Notas Totais:"
   },
   "statusPanel": {
     "currentStatus": "Status atual:",
@@ -674,7 +691,15 @@
     "docGrnSucess": "Documento gerado com sucesso",
     "failedDocGenErrMsg": "Falha ao gerar documento",
     "failedDocGenConsErrMsg": "Erro ao enviar modelo: {error}",
-    "cDogsTemplate": "modelo CDOGS"
+    "cDogsTemplate": "modelo CDOGS",
+    "uploadCdogsTemplate": "Carregar modelo CDOGS",
+    "printOptions": "Opções de Impressão",
+    "expandtextFields": "Expandir campos de texto",
+    "moreInfo": "Mais informações",
+    "defaultCdogsTemplate": "Usar modelo padrão CDOGS",
+    "fileName": "Nome do arquivo",
+    "uploadDate": "Data de upload",
+    "upload": "Carregar"
   },
   "proactiveHelpDialog": {
     "componentInfoLink": "Link de informações do componente",
@@ -880,7 +905,8 @@
     "saveAsADraft": "Salve como um rascunho",
     "editThisDraft": "Editar este rascunho",
     "switchSingleSubmssn": "Alternar para envio único",
-    "switchMultiSubmssn": "Mudar para vários envios"
+    "switchMultiSubmssn": "Mudar para vários envios",
+    "wideLayout": "Layout Amplo"
   },
   "baseCopyToClipboard": {
     "linkToClipboard": "Link copiado para a área de transferência",

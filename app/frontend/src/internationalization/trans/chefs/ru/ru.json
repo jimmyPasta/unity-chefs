@@ -68,7 +68,22 @@
     "status": "Статус",
     "update": "Обновление",
     "cancel": "Отмена",
-    "eventSubscription": "Подписка на события"
+    "eventSubscription": "Подписка на события",
+    "cdogsTemplate": "Шаблон CDOGS"
+  },
+  "documentTemplate": {
+    "uploadTemplate": "Загрузить шаблон CDOGS",
+    "uploadTemplateFile": "Загрузить файл шаблона",
+    "upload": "Загрузить",
+    "delete": "Удалить",
+    "download": "Скачать",
+    "invalidFileMessage": "Шаблон должен использовать одно из следующих расширений: .txt, .docx, .html, .odt, .pptx, .xlsx, .pdf",
+    "uploadSuccess": "Шаблон успешно загружен.",
+    "uploadError": "Произошла ошибка при загрузке шаблона.",
+    "deleteSuccess": "Шаблон успешно удален.",
+    "deleteError": "Произошла ошибка при удалении шаблона.",
+    "fetchError": "Произошла ошибка при получении шаблона.",
+    "info": "Загрузите шаблон для использования Общей службы генерации документов (CDOGS)"
   },
   "formSettings": {
     "pressToAddMultiEmail": "Нажмите <kbd>Enter</kbd> или <kbd>пробел</kbd> <kbd>,</kbd> чтобы добавить несколько адресов электронной почты.",
@@ -150,7 +165,8 @@
     "allowEventSubscription": "Разрешить подписку на событие",
     "eventSubscription": "Подписка на события",
     "validEndpointRequired": "Введите допустимый URL, начинающуюся с https://",
-    "validBearerTokenRequired": "Введите допустимый пример токена: 89abddfb-2cff-4fda-83e6-13221f0c3d4f"
+    "validBearerTokenRequired": "Введите допустимый пример токена: 89abddfb-2cff-4fda-83e6-13221f0c3d4f",
+    "wideFormLayout": "Широкая форма раскладки"
   },
   "formProfile": {
     "message": "Команда CHEFS собирает и систематизирует информацию для создания ключевых аргументов в пользу формирования всесторонних деловых кейсов. Эти кейсы будут играть решающую роль в направлении стратегической операции и постоянного совершенствования CHEFS в ближайшие годы. Эта инициатива по сбору данных является необходимой для принятия важных решений и формирования траектории CHEFS, обеспечивая его адаптивность и эффективность в решении изменяющихся потребностей и вызовов.",
@@ -379,7 +395,7 @@
     "401NotAuthorized": "401: не авторизован:",
     "401ErrorMsg": "Ваша учетная запись настроена неправильно.<br /> Пожалуйста свяжитесь с нами",
     "403Forbidden": "403: Запрещено:",
-    "403ErrorMsg": "Для этой страницы требуется аутентификация {idp}.",
+    "403ErrorMsg": "Для этой страницы требуется аутентификация {permission}.",
     "401UnAuthorized": "401: Неавторизованный. :",
     "401UnAuthorizedErrMsg": "Вы не имеете доступа к этой странице."
   },
@@ -584,7 +600,8 @@
     "fetchConsoleErrMsg": "Ошибка при добавлении заметки:",
     "notes": "Примечания",
     "note": "Примечание",
-    "maxChars": "Максимум 4000 символов"
+    "maxChars": "Максимум 4000 символов",
+    "totalNotes": "Всего заметок:"
   },
   "statusPanel": {
     "currentStatus": "Текущее состояние:",
@@ -674,7 +691,15 @@
     "docGrnSucess": "Документ успешно создан",
     "failedDocGenErrMsg": "Не удалось создать документ",
     "failedDocGenConsErrMsg": "Ошибка при отправке шаблона: {error}",
-    "cDogsTemplate": "Шаблон CDOGS"
+    "cDogsTemplate": "Шаблон CDOGS",
+    "uploadCdogsTemplate": "Загрузить шаблон CDOGS",
+    "printOptions": "Параметры печати",
+    "expandtextFields": "Расширить текстовые поля",
+    "moreInfo": "Дополнительная информация",
+    "defaultCdogsTemplate": "Использовать стандартный шаблон CDOGS",
+    "fileName": "Имя файла",
+    "uploadDate": "Дата загрузки",
+    "upload": "Загрузить"
   },
   "proactiveHelpDialog": {
     "componentInfoLink": "Ссылка на информацию о компоненте",
@@ -880,7 +905,8 @@
     "saveAsADraft": "Сохранить как черновик",
     "editThisDraft": "Изменить этот черновик",
     "switchSingleSubmssn": "Переключиться на одиночную отправку",
-    "switchMultiSubmssn": "Переключиться на несколько отправок"
+    "switchMultiSubmssn": "Переключиться на несколько отправок",
+    "wideLayout": "Широкая компоновка"
   },
   "baseCopyToClipboard": {
     "linkToClipboard": "Ссылка скопирована в буфер обмена",

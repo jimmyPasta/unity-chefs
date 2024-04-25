@@ -68,7 +68,22 @@
     "status": "Status",
     "update": "Aktualisieren",
     "cancel": "Stornieren",
-    "eventSubscription": "Ereignisabonnement"
+    "eventSubscription": "Ereignisabonnement",
+    "cdogsTemplate": "CDOGS-Vorlage"
+  },
+  "documentTemplate": {
+    "uploadTemplate": "CDOGS-Vorlage hochladen",
+    "uploadTemplateFile": "Vorlagedatei hochladen",
+    "upload": "Hochladen",
+    "delete": "Löschen",
+    "download": "Herunterladen",
+    "invalidFileMessage": "Die Vorlage muss eine der folgenden Erweiterungen verwenden: .txt, .docx, .html, .odt, .pptx, .xlsx, .pdf",
+    "uploadSuccess": "Vorlage erfolgreich hochgeladen.",
+    "uploadError": "Beim Hochladen der Vorlage ist ein Fehler aufgetreten.",
+    "deleteSuccess": "Vorlage erfolgreich gelöscht.",
+    "deleteError": "Beim Löschen der Vorlage ist ein Fehler aufgetreten.",
+    "fetchError": "Beim Abrufen der Vorlage ist ein Fehler aufgetreten.",
+    "info": "Laden Sie eine Vorlage hoch, um den Gemeinsamen Dokumenterstellungsdienst (CDOGS) zu verwenden"
   },
   "formSettings": {
     "pressToAddMultiEmail": "Drücken Sie <kbd>die Eingabetaste</kbd> oder <kbd>die Leertaste</kbd> oder <kbd>,</kbd> um mehrere E-Mail-Adressen hinzuzufügen",
@@ -150,7 +165,8 @@
     "allowEventSubscription": "Ereignisabonnement zulassen",
     "eventSubscription": "Ereignisabonnement",
     "validEndpointRequired": "Bitte geben Sie einen gültigen Endpunkt ein, beginnend mit https://",
-    "validBearerTokenRequired": "Bitte geben Sie ein gültiges Token ein. Beispiel: 89abddfb-2cff-4fda-83e6-13221f0c3d4f"
+    "validBearerTokenRequired": "Bitte geben Sie ein gültiges Token ein. Beispiel: 89abddfb-2cff-4fda-83e6-13221f0c3d4f",
+    "wideFormLayout": "Breites Formularlayout"
   },
   "formProfile": {
     "message": "Das CHEFS-Team sammelt und organisiert Informationen, um als entscheidende Grundlage für die Erstellung umfassender Geschäftsfälle zu dienen. Diese Fälle werden eine Schlüsselrolle dabei spielen, den strategischen Betrieb und die laufende Verbesserung von CHEFS in den kommenden Jahren zu leiten. Diese Initiative zur Datensammlung ist entscheidend, um kritische Entscheidungen zu informieren und die Trajektorie von CHEFS zu formen, um seine Anpassungsfähigkeit und Wirksamkeit bei der Bewältigung sich wandelnder Bedürfnisse und Herausforderungen zu gewährleisten.",
@@ -379,7 +395,7 @@
     "401NotAuthorized": "401: nicht autorisiert. :",
     "401ErrorMsg": "Ihr Konto ist nicht richtig eingerichtet.<br /> Kontaktieren Sie bitte",
     "403Forbidden": "403 Verboten. :",
-    "403ErrorMsg": "Diese Seite erfordert eine {idp}-Authentifizierung.",
+    "403ErrorMsg": "Diese Seite erfordert eine {permission}-Authentifizierung.",
     "401UnAuthorized": "401 nicht Autorisiert. :",
     "401UnAuthorizedErrMsg": "Sie haben keine Berechtigung, auf diese Seite zuzugreifen."
   },
@@ -584,7 +600,9 @@
     "fetchConsoleErrMsg": "Fehler beim Hinzufügen der Notiz:",
     "notes": "Anmerkungen",
     "note": "Notiz",
-    "maxChars": "Maximal 4000 Zeichen"
+    "maxChars": "Maximal 4000 Zeichen",
+    "totalNotes": "Gesamtanzahl Notizen:"
+
   },
   "statusPanel": {
     "currentStatus": "Aktueller Status:",
@@ -674,7 +692,15 @@
     "docGrnSucess": "Dokument erfolgreich generiert",
     "failedDocGenErrMsg": "Dokument konnte nicht generiert werden",
     "failedDocGenConsErrMsg": "Fehler beim Senden der Vorlage: {error}",
-    "cDogsTemplate": "CDOGS-Vorlage"
+    "cDogsTemplate": "CDOGS-Vorlage",
+    "uploadCdogsTemplate": "CDOGS-Vorlage hochladen",
+    "printOptions": "Druckoptionen",
+    "expandtextFields": "Textfelder erweitern",
+    "moreInfo": "Mehr Infos",
+    "defaultCdogsTemplate": "Standard-CDOGS-Vorlage verwenden",
+    "fileName": "Dateiname",
+    "uploadDate": "Hochladedatum",
+    "upload": "Hochladen"
   },
   "proactiveHelpDialog": {
     "componentInfoLink": "Link zu Komponenteninformationen",
@@ -880,7 +906,8 @@
     "saveAsADraft": "Als einen Entwurf sichern",
     "editThisDraft": "Bearbeiten Sie diesen Entwurf",
     "switchSingleSubmssn": "Wechseln Sie zur Einzeleinreichung",
-    "switchMultiSubmssn": "Wechseln Sie zu mehreren Einreichungen"
+    "switchMultiSubmssn": "Wechseln Sie zu mehreren Einreichungen",
+    "wideLayout": "Breites Layout"
   },
   "baseCopyToClipboard": {
     "linkToClipboard": "Link in die Zwischenablage kopiert",

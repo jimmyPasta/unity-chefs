@@ -45,6 +45,32 @@ tags:
       This section of the API includes endpoints used to perform various
       operations related to form drafts, for example create or publish a draft
       from a specific version of a form.
+  - name: Document Templates
+    description: >
+      Documents can be generated using the Common Document Generation Service
+      ([CDOGS](https://bcgov.github.io/common-service-showcase/services/cdogs.html)).
+      Form submission data is merged into a user-defined _document template_ to
+      create the document.
+
+      > This is an experimental API that is currently only MVP, and it will
+      change rapidly. It is best to avoid using these endpoints (outside of the
+      CHEFS app itself) until they stabilize.
+
+
+      Currently only a single document template per form is supported by the
+      CHEFS application:
+        1. The `POST /forms/{formId}/documentTemplates` route is used to create
+           a document template for a form.
+        2. Subsequent calls to the `POST` route should be paired with calls to
+           the `DELETE` route to delete the previously active template.
+        
+      Submission metadata is available for use in the document templates:
+        - `{d.chefs.submissionId}`: the unique identifier for the submission,
+          such as `3cb9acc7-cfd8-4491-b091-1277bc0ec303` 
+        - `{d.chefs.confirmationId}`: The uppercased first eight characters of
+          the `submissionId`, such as `3CB9ACC7`
+        - `{d.chefs.formVersion}`: The numeric version of the form that was used
+          to create the submission, such as `1`
   - name: Submission
     description: >-
       These API endpoints handle the input data provided by a user that
@@ -111,6 +137,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Form'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         default:
@@ -139,6 +167,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/FormBasic'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         default:
@@ -174,7 +204,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
-          $ref: '#/components/responses/UnauthorizedError'
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         '429':
@@ -217,7 +247,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
-          $ref: '#/components/responses/UnauthorizedError'
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         '429':
@@ -254,7 +284,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
-          $ref: '#/components/responses/UnauthorizedError'
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         '429':
@@ -283,6 +313,8 @@ paths:
                 $ref: '#/components/schemas/FormApiKey'
         '400':
           $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         default:
@@ -308,6 +340,8 @@ paths:
                 $ref: '#/components/schemas/FormApiKey'
         '400':
           $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         default:
@@ -326,9 +360,11 @@ paths:
         - $ref: '#/components/parameters/formIdParam'
       responses:
         '204':
-          description: OK
+          $ref: '#/components/responses/NoContent'
         '400':
           $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         default:
@@ -355,8 +391,187 @@ paths:
                 $ref: '#/components/schemas/FormApiKey'
         '400':
           $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /forms/{formId}/documentTemplates:
+    get:
+      summary: Get all document templates for a form
+      description: >
+        Gets an array containing all the document template metadata for the
+        given form.
+
+        > Objects returned by this route do not include the `template` field. If
+        this document template file is needed, use the `id` field from the
+        returned metadata to make a call to
+        `/forms/{formId}/documentTemplates/{documentTemplateId}`.
+      operationId: readDocumentTemplates
+      security:
+        - BasicAuth: []
+        - BearerAuth: []
+          OpenID: []
+      tags:
+        - Document Templates
+      parameters:
+        - $ref: '#/components/parameters/formIdParam'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DocumentTemplateResponseBasic'
+          headers:
+            RateLimit:
+              $ref: '#/components/headers/RateLimit'
+            RateLimit-Policy:
+              $ref: '#/components/headers/RateLimit-Policy'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      summary: Create a document template
+      description: >
+        Creates a document template for a form. This makes it easier for users
+        to generate documents, as the template is associated with the form and
+        does not need to be distributed to every user.
+      operationId: updateDocumentTemplate
+      security:
+        - BasicAuth: []
+        - BearerAuth: []
+          OpenID: []
+      tags:
+        - Document Templates
+      parameters:
+        - $ref: '#/components/parameters/formIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DocumentTemplateRequest'
+      responses:
+        '201':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentTemplateResponse'
+          headers:
+            RateLimit:
+              $ref: '#/components/headers/RateLimit'
+            RateLimit-Policy:
+              $ref: '#/components/headers/RateLimit-Policy'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /forms/{formId}/documentTemplates/{documentTemplateId}:
+    get:
+      summary: Get a document template
+      description: >
+        Gets a document template for the given form. The response will include
+        the `template` field, which is the actual document template file.
+      operationId: readDocumentTemplate
+      security:
+        - BasicAuth: []
+        - BearerAuth: []
+          OpenID: []
+      tags:
+        - Document Templates
+      parameters:
+        - $ref: '#/components/parameters/formIdParam'
+        - $ref: '#/components/parameters/documentTemplateIdParam'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentTemplateResponse'
+          headers:
+            RateLimit:
+              $ref: '#/components/headers/RateLimit'
+            RateLimit-Policy:
+              $ref: '#/components/headers/RateLimit-Policy'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      summary: (Soft) Delete a document template
+      description: >
+        Marks a document template as no longer being active. In this state the
+        document template is essentially treated as if it does not exist. It
+        will not be returned by the `GET` routes and cannot otherwise be used.
+      operationId: deleteDocumentTemplate
+      security:
+        - BasicAuth: []
+        - BearerAuth: []
+          OpenID: []
+      tags:
+        - Document Templates
+      parameters:
+        - $ref: '#/components/parameters/formIdParam'
+        - $ref: '#/components/parameters/documentTemplateIdParam'
+      responses:
+        '204':
+          description: OK
+          headers:
+            RateLimit:
+              $ref: '#/components/headers/RateLimit'
+            RateLimit-Policy:
+              $ref: '#/components/headers/RateLimit-Policy'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
         default:
           description: Unexpected error
           content:
@@ -455,7 +670,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
-          $ref: '#/components/responses/UnauthorizedError'
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         '429':
@@ -509,7 +724,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
-          $ref: '#/components/responses/UnauthorizedError'
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         '429':
@@ -571,7 +786,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
-          $ref: '#/components/responses/UnauthorizedError'
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         '404':
@@ -612,7 +827,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
-          $ref: '#/components/responses/UnauthorizedError'
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         '404':
@@ -652,7 +867,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
-          $ref: '#/components/responses/UnauthorizedError'
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         '429':
@@ -698,7 +913,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
-          $ref: '#/components/responses/UnauthorizedError'
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         '404':
@@ -740,7 +955,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
-          $ref: '#/components/responses/UnauthorizedError'
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         '429':
@@ -791,7 +1006,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
-          $ref: '#/components/responses/UnauthorizedError'
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         '429':
@@ -830,7 +1045,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
-          $ref: '#/components/responses/UnauthorizedError'
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         '404':
@@ -879,7 +1094,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
-          $ref: '#/components/responses/UnauthorizedError'
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         '404':
@@ -915,7 +1130,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
-          $ref: '#/components/responses/UnauthorizedError'
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         '404':
@@ -956,7 +1171,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
-          $ref: '#/components/responses/UnauthorizedError'
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         '404':
@@ -1007,7 +1222,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
-          $ref: '#/components/responses/UnauthorizedError'
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         '429':
@@ -1048,7 +1263,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
-          $ref: '#/components/responses/UnauthorizedError'
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         '404':
@@ -1094,7 +1309,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
-          $ref: '#/components/responses/UnauthorizedError'
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         '404':
@@ -1141,7 +1356,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
-          $ref: '#/components/responses/UnauthorizedError'
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         '404':
@@ -1197,7 +1412,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
-          $ref: '#/components/responses/UnauthorizedError'
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         '404':
@@ -1235,7 +1450,7 @@ paths:
             RateLimit-Policy:
               $ref: '#/components/headers/RateLimit-Policy'
         '401':
-          $ref: '#/components/responses/UnauthorizedError'
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         '429':
@@ -1266,6 +1481,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/FormSubmission'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         default:
@@ -1297,6 +1514,8 @@ paths:
               $ref: '#/components/headers/RateLimit'
             RateLimit-Policy:
               $ref: '#/components/headers/RateLimit-Policy'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         '429':
@@ -1342,6 +1561,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/EmailMessage'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         default:
@@ -1367,6 +1588,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/SubmissionEditMetadata'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         default:
@@ -1390,6 +1613,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SubmissionFormVersionOptions'
+        '404':
+          $ref: '#/components/responses/NotFound'
         default:
           description: Unexpected error
           content:
@@ -1415,6 +1640,8 @@ paths:
                   $ref: '#/components/schemas/StatusCodes'
         '400':
           $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         default:
@@ -1450,7 +1677,7 @@ paths:
             RateLimit-Policy:
               $ref: '#/components/headers/RateLimit-Policy'
         '401':
-          $ref: '#/components/responses/UnauthorizedError'
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         '429':
@@ -1484,6 +1711,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SubmissionStatusHistory'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         default:
@@ -1492,9 +1721,78 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+  /submissions/{formSubmissionId}/template/{documentTemplateId}/render:
+    get:
+      summary: Generate document from submission ID and template ID
+      description: >-
+        Uses form submission data (given the form submission ID) and a document
+        template (given the document template ID) and generates a document
+        containing the submission data.
+
+        #### Common Document Generation Service (CDOGS)
+
+        This endpoint is a passthrough to CDOGS. Instead of using *BasicAuth* to
+        call this endpoint, it is highly recommended that you [directly call
+        CDOGS](https://bcgov.github.io/common-service-showcase/services/cdogs.html).
+        Benefits of calling CDOGS directly from your application:
+          - avoid CHEFS API rate limiting restrictions
+          - avoid CHEFS API timeout restrictions (for large documents)
+          - better performance (direct call instead of passthrough)
+          - ability to use the CDOGS template cache
+          - direct support from the CDOGS team for your specific Client ID
+      operationId: templateIdSubmissionIdRender
+      security:
+        - BasicAuth: []
+        - BearerAuth: []
+          OpenID: []
+      tags:
+        - Document Templates
+      parameters:
+        - $ref: '#/components/parameters/formSubmissionIdParam'
+        - $ref: '#/components/parameters/documentTemplateIdParam'
+      responses:
+        '200':
+          description: Returns the document template with merged variables
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+                description: Raw binary-encoded response
+          headers:
+            Content-Disposition:
+              schema:
+                type: string
+              description: >-
+                Indicates if a browser should render this resource inline or
+                treat as an attachment for download
+              example: attachment; filename=file.pdf
+            Content-Type:
+              schema:
+                type: string
+              description: The MIME-type of the binary file payload
+              example: application/pdf
+            RateLimit:
+              $ref: '#/components/headers/RateLimit'
+            RateLimit-Policy:
+              $ref: '#/components/headers/RateLimit-Policy'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   /submissions/{formSubmissionId}/template/render:
     post:
-      summary: Generate a document from a document template
+      summary: Generate document from submission ID and template object
       description: >-
         Merges data from a form submission into a document template.
 
@@ -1509,13 +1807,13 @@ paths:
           - better performance (direct call instead of passthrough)
           - ability to use the CDOGS template cache
           - direct support from the CDOGS team for your specific Client ID
-      operationId: uploadTemplateAndRenderReport
+      operationId: templateObjectSubmissionIdRender
       security:
         - BasicAuth: []
         - BearerAuth: []
           OpenID: []
       tags:
-        - Template
+        - Document Templates
       parameters:
         - $ref: '#/components/parameters/formSubmissionIdParam'
       requestBody:
@@ -1553,6 +1851,8 @@ paths:
               $ref: '#/components/headers/RateLimit-Policy'
         '400':
           $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         '422':
@@ -1584,6 +1884,8 @@ paths:
                   allOf:
                     - $ref: '#/components/schemas/Note'
                     - $ref: '#/components/schemas/TimeStampUserData'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         default:
@@ -1612,6 +1914,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Note'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         default:
@@ -1650,6 +1954,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/FileUpload'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         default:
@@ -1678,6 +1984,8 @@ paths:
               schema:
                 type: string
                 format: binary
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         '429':
@@ -1697,7 +2005,9 @@ paths:
         - $ref: '#/components/parameters/fileIdParam'
       responses:
         '202':
-          description: Accepted
+          $ref: '#/components/responses/Accepted'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         default:
@@ -1725,6 +2035,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Permission'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         default:
@@ -1757,6 +2069,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Permission'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         default:
@@ -1790,6 +2104,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Permission'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         default:
@@ -1828,6 +2144,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Permission'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         default:
@@ -1851,6 +2169,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Role'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         default:
@@ -1883,6 +2203,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Role'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         default:
@@ -1911,6 +2233,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Role'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         default:
@@ -1948,6 +2272,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Role'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         default:
@@ -1968,7 +2294,7 @@ paths:
           schema:
             type: string
             format: uuid
-            example: c6455376-382c-439d-a811-0381a012d696
+            example: aeb3b705-1de5-4f4e-a4e6-0716b7671034
           description: form ID
         - in: query
           name: active
@@ -1996,6 +2322,8 @@ paths:
                   - type: array
                     items:
                       $ref: '#/components/schemas/UserForm'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         default:
@@ -2016,7 +2344,7 @@ paths:
           schema:
             type: string
             format: uuid
-            example: c6455376-382c-439d-a811-0381a012d696
+            example: aeb3b705-1de5-4f4e-a4e6-0716b7671034
           description: form ID
         - in: query
           name: formSubmissionId
@@ -2047,6 +2375,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/UserSubmission'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         default:
@@ -2095,7 +2425,7 @@ paths:
           schema:
             type: string
             format: uuid
-            example: c6455376-382c-439d-a811-0381a012d696
+            example: aeb3b705-1de5-4f4e-a4e6-0716b7671034
           description: form ID
           required: true
         - in: query
@@ -2168,6 +2498,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/UserAccess'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         default:
@@ -2187,7 +2519,7 @@ paths:
           schema:
             type: string
             format: uuid
-            example: c6455376-382c-439d-a811-0381a012d696
+            example: aeb3b705-1de5-4f4e-a4e6-0716b7671034
           description: form id
           required: true
         - in: query
@@ -2215,6 +2547,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/UserAccess'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         default:
@@ -2252,6 +2586,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/UserAccessSubmission'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         default:
@@ -2301,6 +2637,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/UserAccessSubmission'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         default:
@@ -2365,7 +2703,7 @@ paths:
           schema:
             type: string
             format: uuid
-            example: c6455376-382c-439d-a811-0381a012d696
+            example: aeb3b705-1de5-4f4e-a4e6-0716b7671034
           description: form id
           required: true
         - in: query
@@ -2403,6 +2741,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/UserAccess'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         default:
@@ -2428,7 +2768,7 @@ paths:
           schema:
             type: string
             format: uuid
-            example: c6455376-382c-439d-a811-0381a012d696
+            example: aeb3b705-1de5-4f4e-a4e6-0716b7671034
           description: form id
           required: true
       requestBody:
@@ -2448,6 +2788,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/UserAccess'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         default:
@@ -2512,6 +2854,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         default:
@@ -2543,6 +2887,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         default:
@@ -2565,6 +2911,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserPreferences'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         default:
@@ -2592,6 +2940,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserPreferences'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         default:
@@ -2608,7 +2958,9 @@ paths:
         - User
       responses:
         '204':
-          description: OK
+          $ref: '#/components/responses/NoContent'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         default:
@@ -2635,6 +2987,8 @@ paths:
                 allOf:
                   - $ref: '#/components/schemas/UserFormPreferences'
                   - $ref: '#/components/schemas/TimeStampUserData'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         default:
@@ -2666,6 +3020,8 @@ paths:
                 allOf:
                   - $ref: '#/components/schemas/UserFormPreferences'
                   - $ref: '#/components/schemas/TimeStampUserData'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         default:
@@ -2684,7 +3040,9 @@ paths:
         - $ref: '#/components/parameters/formIdParam'
       responses:
         '204':
-          description: OK
+          $ref: '#/components/responses/NoContent'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         default:
@@ -2707,6 +3065,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Label'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         default:
@@ -2733,6 +3093,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Label'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         default:
@@ -2767,6 +3129,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Form'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         default:
@@ -2794,6 +3158,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/FormBasic'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         default:
@@ -2822,6 +3188,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/FormApiDetails'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         default:
@@ -2844,7 +3212,9 @@ paths:
         - $ref: '#/components/parameters/formIdParam'
       responses:
         '204':
-          description: OK
+          $ref: '#/components/responses/NoContent'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         default:
@@ -2872,6 +3242,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserForm'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         default:
@@ -2901,6 +3273,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/FormUserList'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         default:
@@ -2942,6 +3316,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserAccess'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         default:
@@ -2969,6 +3345,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         default:
@@ -3002,6 +3380,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         default:
@@ -3051,74 +3431,61 @@ components:
       type: openIdConnect
       openIdConnectUrl: https://example.com/.well-known/openid-configuration
   parameters:
+    documentTemplateIdParam:
+      in: path
+      name: documentTemplateId
+      description: ID of the document template.
+      schema:
+        type: string
+        format: uuid
+      required: true
+      example: 7a61407b-2c00-467d-9dd5-f9f060779c5b
     fileIdParam:
       in: path
       name: fileId
+      description: ID of the file.
       schema:
         type: string
         format: uuid
       example: 3cb9acc7-cfd8-4491-b091-1277bc0ec303
       required: true
-      description: ID of the File
     formIdParam:
       in: path
       name: formId
+      description: ID of the form.
       schema:
         type: string
         format: uuid
-      description: ID of the form
       required: true
-      example: c6455376-382c-439d-a811-0381a012d696
+      example: aeb3b705-1de5-4f4e-a4e6-0716b7671034
     formVersionIdParam:
       in: path
       name: formVersionId
+      description: ID of the form version.
       schema:
         type: string
         format: uuid
       example: a675ab2a-1e88-4fb5-88f9-c7cb051a18b2
       required: true
-      description: ID of the form version
     formVersionDraftIdParam:
       in: path
       name: formVersionDraftId
+      description: ID of the draft form version.
       schema:
         type: string
         format: uuid
         example: b2e11d09-30fe-4c4c-9375-5a9de0dc2e9e
       required: true
-      description: ID of the draft for form version
     formSubmissionIdParam:
       in: path
       name: formSubmissionId
+      description: ID of the submission.
       schema:
         type: string
         format: uuid
       example: 3cb9acc7-cfd8-4491-b091-1277bc0ec303
       required: true
-      description: ID of the Submission
   schemas:
-    BadRequest:
-      allOf:
-        - $ref: '#/components/schemas/Problem'
-        - type: object
-          properties:
-            status:
-              example: 400
-            title:
-              example: Bad Request
-            type:
-              example: https://httpstatuses.com/400
-    Conflict:
-      allOf:
-        - $ref: '#/components/schemas/Problem'
-        - type: object
-          properties:
-            status:
-              example: 409
-            title:
-              example: Conflict
-            type:
-              example: https://httpstatuses.com/409
     CurrentUser:
       type: object
       properties:
@@ -3149,6 +3516,56 @@ components:
         public:
           type: boolean
           example: false
+    DocumentTemplateRequest:
+      type: object
+      properties:
+        filename:
+          type: string
+          description: >
+            The filename that the document template had when it was
+            originally uploaded.
+          example: my_document_template.txt
+        template:
+          type: string
+          description: >
+            The file that is the document template to be used in document
+            generation.
+          example: Hello {d.firstName}
+    DocumentTemplateResponse:
+      allOf:
+        - $ref: '#/components/schemas/DocumentTemplateResponseBasic'
+        - type: object
+          properties:
+            template:
+              type: string
+              description: >
+                The file that is the document template to be used in document
+                generation.
+              example: Hello {d.firstName}
+    DocumentTemplateResponseBasic:
+      allOf:
+        - type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+              description: >
+                The unique identifier for the document template.
+              example: 7a61407b-2c00-467d-9dd5-f9f060779c5b
+            formId:
+              type: string
+              format: uuid
+              description: >
+                The unique identifier for the form that this document template
+                belongs to.
+              example: aeb3b705-1de5-4f4e-a4e6-0716b7671034
+            filename:
+              type: string
+              description: >
+                The filename that the document template had when it was
+                originally uploaded.
+              example: my_document_template.docx
+        - $ref: '#/components/schemas/TimeStampCreate'
     EmailMessage:
       allOf:
         - type: object
@@ -3211,23 +3628,6 @@ components:
               items:
                 $ref: '#/components/schemas/FormVersionBasic'
         - $ref: '#/components/schemas/TimeStampUserData'
-    FormApiKey:
-      allOf:
-        - type: object
-          properties:
-            id:
-              type: number
-              example: 4
-            formId:
-              type: string
-              example: c6455376-382c-439d-a811-0381a012d696
-            secret:
-              type: string
-              example: dd7d1699-61ec-4037-aa33-727f8aa79c0a
-            filesApiAccess:
-              type: boolean
-              example: true
-        - $ref: '#/components/schemas/TimeStampUserData'
     FormApiDetails:
       allOf:
         - type: object
@@ -3237,7 +3637,24 @@ components:
               example: 4
             formId:
               type: string
-              example: c6455376-382c-439d-a811-0381a012d696
+              example: aeb3b705-1de5-4f4e-a4e6-0716b7671034
+        - $ref: '#/components/schemas/TimeStampUserData'
+    FormApiKey:
+      allOf:
+        - type: object
+          properties:
+            id:
+              type: number
+              example: 4
+            formId:
+              type: string
+              example: aeb3b705-1de5-4f4e-a4e6-0716b7671034
+            secret:
+              type: string
+              example: dd7d1699-61ec-4237-aa33-727f8aa79c0a
+            filesApiAccess:
+              type: boolean
+              example: true
         - $ref: '#/components/schemas/TimeStampUserData'
     FormBasic:
       allOf:
@@ -3262,6 +3679,9 @@ components:
               example:
                 - me@email.com
                 - manager@email.com
+            enableDocumentTemplates:
+              type: boolean
+              example: true
             enableStatusUpdates:
               type: boolean
               example: true
@@ -3398,27 +3818,6 @@ components:
               example: a675ab2a-1e88-4fb5-88f9-c7cb051a18b2
         - $ref: '#/components/schemas/FormSchema'
         - $ref: '#/components/schemas/TimeStampUserData'
-    FormWithoutVersions:
-      allOf:
-        - $ref: '#/components/schemas/FormBasic'
-        - type: object
-          properties:
-            id:
-              type: string
-              example: aeb3b705-1de5-4f4e-a4e6-0716b7671034
-            active:
-              type: boolean
-              example: true
-            labels:
-              type: array
-              example:
-                - Survey
-              items:
-                type: string
-            snake:
-              type: string
-              example: my-survey-form
-        - $ref: '#/components/schemas/TimeStampUserData'
     FormOptions:
       allOf:
         - $ref: '#/components/schemas/FormCore'
@@ -3436,6 +3835,18 @@ components:
             snake:
               type: string
               example: my-survey-form
+    FormPreferences:
+      type: object
+      description: Form level user preferences
+      properties:
+        columnList:
+          type: array
+          description: A list of desired columns to show
+          example:
+            - foo
+            - bar
+          items:
+            type: string
     FormRoleUser:
       type: object
       properties:
@@ -3505,50 +3916,6 @@ components:
               type: object
               description: this is the json for the form submission.
         - $ref: '#/components/schemas/TimeStampUserData'
-    FormSubmissionObjectForMultipleUpload:
-      allOf:
-        - type: object
-          description: this is the json for the form submission.
-    FormSubmissionResponseMultiple:
-      allOf:
-        - type: array
-          items:
-            - type: object
-              properties:
-                draft:
-                  type: boolean
-                  description: >-
-                    Used to indicate if submission came from a draft version of a
-                    form.
-                  example: false
-                submission:
-                  type: object
-                  description: this object should contain one property named data as an array. This array named data should store all the multiple drafts as object in this array.
-                  properties:
-                    data:
-                      type: array
-                      items:
-                        $ref: '#/components/schemas/FormSubmissionObjectForMultipleUpload'
-                      description: this is an array of multiple objects, each object contain data of single the form submissions.
-    FormSubmissionMultiple:
-      allOf:
-        - type: object
-          properties:
-            draft:
-              type: boolean
-              description: >-
-                Used to indicate if submission came from a draft version of a
-                form.
-              example: false
-            submission:
-              type: object
-              description: this object should contain one property named data as an array. This array named data should store all the multiple drafts as object in this array.
-              properties:
-                data:
-                  type: array
-                  items:
-                    $ref: '#/components/schemas/FormSubmissionObjectForMultipleUpload'
-                  description: this is an array of multiple objects, each object contain data of single the form submissions.
     FormSubmissionCore:
       type: object
       properties:
@@ -3672,6 +4039,50 @@ components:
               type: boolean
               description: This parameter should be set to true if the form submissions are large (e.g. above 500) or the form is big
               example: false
+    FormSubmissionMultiple:
+      allOf:
+        - type: object
+          properties:
+            draft:
+              type: boolean
+              description: >-
+                Used to indicate if submission came from a draft version of a
+                form.
+              example: false
+            submission:
+              type: object
+              description: this object should contain one property named data as an array. This array named data should store all the multiple drafts as object in this array.
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/FormSubmissionObjectForMultipleUpload'
+                  description: this is an array of multiple objects, each object contain data of single the form submissions.
+    FormSubmissionObjectForMultipleUpload:
+      allOf:
+        - type: object
+          description: this is the json for the form submission.
+    FormSubmissionResponseMultiple:
+      allOf:
+        - type: array
+          items:
+            - type: object
+              properties:
+                draft:
+                  type: boolean
+                  description: >-
+                    Used to indicate if submission came from a draft version of a
+                    form.
+                  example: false
+                submission:
+                  type: object
+                  description: this object should contain one property named data as an array. This array named data should store all the multiple drafts as object in this array.
+                  properties:
+                    data:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/FormSubmissionObjectForMultipleUpload'
+                      description: this is an array of multiple objects, each object contain data of single the form submissions.
     FormSubmissionSummary:
       allOf:
         - type: object
@@ -3766,6 +4177,27 @@ components:
         - email1
       items:
         type: string
+    FormWithoutVersions:
+      allOf:
+        - $ref: '#/components/schemas/FormBasic'
+        - type: object
+          properties:
+            id:
+              type: string
+              example: aeb3b705-1de5-4f4e-a4e6-0716b7671034
+            active:
+              type: boolean
+              example: true
+            labels:
+              type: array
+              example:
+                - Survey
+              items:
+                type: string
+            snake:
+              type: string
+              example: my-survey-form
+        - $ref: '#/components/schemas/TimeStampUserData'
     IdentityProvider:
       allOf:
         - type: object
@@ -3808,17 +4240,15 @@ components:
           example: >-
             'This is a note that can be up to 4000 characters I add to the
             submission and can link to an individual status id'
-    NotFound:
+    Permission:
       allOf:
-        - $ref: '#/components/schemas/Problem'
+        - $ref: '#/components/schemas/PermissionBasic'
         - type: object
           properties:
-            status:
-              example: 404
-            title:
-              example: Not Found
-            type:
-              example: https://httpstatuses.com/404
+            roles:
+              type: array
+              items:
+                $ref: '#/components/schemas/RoleBasic'
     PermissionBasic:
       allOf:
         - type: object
@@ -3837,15 +4267,6 @@ components:
               type: boolean
               example: true
         - $ref: '#/components/schemas/TimeStampUserData'
-    Permission:
-      allOf:
-        - $ref: '#/components/schemas/PermissionBasic'
-        - type: object
-          properties:
-            roles:
-              type: array
-              items:
-                $ref: '#/components/schemas/RoleBasic'
     Problem:
       required:
         - type
@@ -4062,20 +4483,51 @@ components:
               description: >-
                 The original file type of the `content` document template.
               example: txt
+    TimeStampCreate:
+      type: object
+      properties:
+        createdBy:
+          type: string
+          description: >
+            The username of the person who created the object.
+          example: bsmith@idir
+        createdAt:
+          type: string
+          description: >
+            The UTC date and time when the object was created.
+          example: '2020-06-04T18:49:20.672Z'
+        updatedBy:
+          type: string
+          description: >
+            The username of the person who last modified the object.
+          example:
+        updatedAt:
+          type: string
+          description: >
+            The UTC date and time when the object was last modified.
+          example: '2020-06-04T18:49:20.672Z'
     TimeStampUserData:
       type: object
       properties:
         createdBy:
           type: string
+          description: >
+            The username of the person who created the object.
           example: bsmith@idir
         createdAt:
           type: string
+          description: >
+            The UTC date and time when the object was created.
           example: '2020-06-04T18:49:20.672Z'
         updatedBy:
           type: string
+          description: >
+            The username of the person who last modified the object.
           example: jsmith@idir
         updatedAt:
           type: string
+          description: >
+            The UTC date and time when the object was last modified.
           example: '2020-06-05T11:27:15.853Z'
     User:
       allOf:
@@ -4317,18 +4769,6 @@ components:
             - team_manager
           items:
             type: string
-    FormPreferences:
-      type: object
-      description: Form level user preferences
-      properties:
-        columnList:
-          type: array
-          description: A list of desired columns to show
-          example:
-            - foo
-            - bar
-          items:
-            type: string
     UserFormPreferences:
       type: object
       properties:
@@ -4420,34 +4860,6 @@ components:
           type: integer
           description: The version number of the form for a submission
           example: 1
-    ValidationError:
-      allOf:
-        - $ref: '#/components/schemas/Problem'
-        - type: object
-          required:
-            - errors
-          properties:
-            errors:
-              type: array
-              items:
-                type: object
-                required:
-                  - message
-                properties:
-                  value:
-                    type: object
-                    description: Contents of the field that was in error.
-                    example: utf-8x
-                  message:
-                    type: string
-                    description: The error message for the field.
-                    example: Invalid value `encoding`.
-            status:
-              example: 422
-            title:
-              example: Unprocessable Entity
-            type:
-              example: https://httpstatuses.com/422
   responses:
     Accepted:
       description: Accepted
@@ -4456,21 +4868,31 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/BadRequest'
-    Conflict:
-      description: Request conflicts with server state
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Conflict'
-    Error:
-      description: Unexpected error
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
+            allOf:
+              - $ref: '#/components/schemas/Problem'
+              - type: object
+                properties:
+                  status:
+                    example: 400
+                  title:
+                    example: Bad Request
+                  type:
+                    example: https://httpstatuses.com/400
     Forbidden:
       description: Lack required role to perform action
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/Problem'
+              - type: object
+                properties:
+                  status:
+                    example: 403
+                  title:
+                    example: Forbidden
+                  type:
+                    example: https://httpstatuses.com/403
     NoContent:
       description: Accepted and no content
     NotFound:
@@ -4478,7 +4900,16 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/NotFound'
+            allOf:
+              - $ref: '#/components/schemas/Problem'
+              - type: object
+                properties:
+                  status:
+                    example: 404
+                  title:
+                    example: Not Found
+                  type:
+                    example: https://httpstatuses.com/404
     TooManyRequests:
       description: BasicAuth request exceeds rate limiting
       headers:
@@ -4488,8 +4919,21 @@ components:
           $ref: '#/components/headers/RateLimit-Policy'
         retry-after:
           $ref: '#/components/headers/retry-after'
-    UnauthorizedError:
+    Unauthorized:
       description: Invalid authorization credentials
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/Problem'
+              - type: object
+                properties:
+                  status:
+                    example: 401
+                  title:
+                    example: Unauthorized
+                  type:
+                    example: https://httpstatuses.com/401
     UnprocessableEntity:
       description: >-
         The server was unable to process the contained instructions. Generally
@@ -4497,4 +4941,30 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ValidationError'
+            allOf:
+              - $ref: '#/components/schemas/Problem'
+              - type: object
+                required:
+                  - errors
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      required:
+                        - message
+                      properties:
+                        value:
+                          type: object
+                          description: Contents of the field that was in error.
+                          example: utf-8x
+                        message:
+                          type: string
+                          description: The error message for the field.
+                          example: Invalid value `encoding`.
+                  status:
+                    example: 422
+                  title:
+                    example: Unprocessable Entity
+                  type:
+                    example: https://httpstatuses.com/422

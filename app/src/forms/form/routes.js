@@ -1,4 +1,3 @@
-const config = require('config');
 const routes = require('express').Router();
 const apiAccess = require('../auth/middleware/apiAccess');
 const { currentUser, hasFormPermissions } = require('../auth/middleware/userAccess');
@@ -6,16 +5,17 @@ const validateParameter = require('../common/middleware/validateParameter');
 const P = require('../common/constants').Permissions;
 const rateLimiter = require('../common/middleware').apiKeyRateLimiter;
 
-const keycloak = require('../../components/keycloak');
+const jwtService = require('../../components/jwtService');
 const controller = require('./controller');
 
 routes.use(currentUser);
 
+routes.param('documentTemplateId', validateParameter.validateDocumentTemplateId);
 routes.param('formId', validateParameter.validateFormId);
 routes.param('formVersionDraftId', validateParameter.validateFormVersionDraftId);
 routes.param('formVersionId', validateParameter.validateFormVersionId);
 
-routes.get('/', keycloak.protect(`${config.get('server.keycloak.clientId')}:admin`), async (req, res, next) => {
+routes.get('/', jwtService.protect('admin'), async (req, res, next) => {
   await controller.listForms(req, res, next);
 });
 
@@ -25,6 +25,22 @@ routes.post('/', async (req, res, next) => {
 
 routes.get('/:formId', rateLimiter, apiAccess, hasFormPermissions([P.FORM_READ]), async (req, res, next) => {
   await controller.readForm(req, res, next);
+});
+
+routes.get('/:formId/documentTemplates', rateLimiter, apiAccess, hasFormPermissions([P.DOCUMENT_TEMPLATE_READ]), async (req, res, next) => {
+  await controller.documentTemplateList(req, res, next);
+});
+
+routes.post('/:formId/documentTemplates', rateLimiter, apiAccess, hasFormPermissions([P.DOCUMENT_TEMPLATE_CREATE]), async (req, res, next) => {
+  await controller.documentTemplateCreate(req, res, next);
+});
+
+routes.delete('/:formId/documentTemplates/:documentTemplateId', rateLimiter, apiAccess, hasFormPermissions([P.DOCUMENT_TEMPLATE_DELETE]), async (req, res, next) => {
+  await controller.documentTemplateDelete(req, res, next);
+});
+
+routes.get('/:formId/documentTemplates/:documentTemplateId', rateLimiter, apiAccess, hasFormPermissions([P.DOCUMENT_TEMPLATE_READ]), async (req, res, next) => {
+  await controller.documentTemplateRead(req, res, next);
 });
 
 routes.get('/:formId/export', rateLimiter, apiAccess, hasFormPermissions([P.FORM_READ, P.SUBMISSION_READ]), async (req, res, next) => {

@@ -10,6 +10,7 @@ export default {
     ManageSubmissionUsers,
     PrintOptions,
   },
+  inject: ['setWideLayout'],
   props: {
     block: {
       type: Boolean,
@@ -51,8 +52,17 @@ export default {
       type: Object,
       default: undefined,
     },
+    wideFormLayout: {
+      type: Boolean,
+      default: false,
+    },
   },
   emits: ['save-draft', 'switchView', 'showdoYouWantToSaveTheDraftModal'],
+  data() {
+    return {
+      isWideLayout: false,
+    };
+  },
   computed: {
     ...mapState(useFormStore, ['lang', 'isRTL']),
     canSaveDraft() {
@@ -63,6 +73,16 @@ export default {
         this.readOnly &&
         this.permissions.includes(FormPermissions.SUBMISSION_UPDATE)
       );
+    },
+  },
+  async mounted() {
+    // set wide layout
+    this.setWideLayout(this.isWideLayout);
+  },
+  methods: {
+    toggleWideLayout() {
+      this.isWideLayout = !this.isWideLayout;
+      this.setWideLayout(this.isWideLayout);
     },
   },
 };
@@ -107,8 +127,31 @@ export default {
         </v-tooltip>
       </span>
 
+      <!-- Wide layout button -->
+      <span>
+        <v-tooltip location="bottom">
+          <template #activator="{ props }">
+            <v-btn
+              v-if="wideFormLayout"
+              class="ml-3"
+              color="primary"
+              v-bind="props"
+              size="x-small"
+              density="default"
+              icon="mdi:mdi-panorama-variant-outline"
+              @click="toggleWideLayout"
+            />
+          </template>
+          <span>{{ $t('trans.formViewerActions.wideLayout') }}</span>
+        </v-tooltip>
+      </span>
+
       <span class="ml-2 d-print-none">
-        <PrintOptions :submission="submission" :submission-id="submissionId" />
+        <PrintOptions
+          :submission="submission"
+          :submission-id="submissionId"
+          :f="formId"
+        />
       </span>
 
       <!-- Save a draft -->
