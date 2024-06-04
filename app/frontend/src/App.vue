@@ -1,58 +1,60 @@
-<script>
+<script setup>
 import BaseNotificationContainer from '~/components/base/BaseNotificationContainer.vue';
 import BCGovHeader from '~/components/bcgov/BCGovHeader.vue';
 import BCGovNavBar from './components/bcgov/BCGovNavBar.vue';
 import BCGovFooter from '~/components/bcgov/BCGovFooter.vue';
+import { computed, provide, ref } from 'vue';
+import { useRoute } from 'vue-router';
 
-export default {
-  components: {
-    BaseNotificationContainer,
-    BCGovHeader,
-    BCGovNavBar,
-    BCGovFooter,
-  },
-  provide() {
-    return {
-      setWideLayout: this.setWideLayout,
-    };
-  },
-  data() {
-    return {
-      isWideLayout: false,
-    };
-  },
-  computed: {
-    isValidRoute() {
-      return (
-        this.$route.name === 'FormSubmit' ||
-        this.$route.name === 'FormView' ||
-        this.$route.name === 'FormSuccess'
-      );
-    },
-  },
-  methods: {
-    setWideLayout(isWide) {
-      this.isWideLayout = isWide;
-    },
-  },
-};
+const isWideLayout = ref(false);
+const route = useRoute();
+
+const appTitle = computed(() => {
+  return route && route.meta && route.meta.title
+    ? route.meta.title
+    : import.meta.env.VITE_TITLE;
+});
+
+const isFormSubmitMode = computed(() => {
+  return route && route.meta && route.meta.formSubmitMode;
+});
+
+const isValidRoute = computed(() => {
+  return ['FormSubmit', 'FormView', 'FormSuccess'].includes(route.name);
+});
+
+const isWidePage = computed(() => {
+  return isWideLayout.value && isValidRoute ? 'main-wide' : 'main';
+});
+
+provide('setWideLayout', setWideLayout);
+
+function setWideLayout(isWide) {
+  isWideLayout.value = isWide;
+}
+
+defineExpose({
+  appTitle,
+  isValidRoute,
+  isWidePage,
+  setWideLayout,
+  isFormSubmitMode,
+  isWideLayout,
+});
 </script>
 
 <template>
   <v-layout ref="app" class="app">
     <v-main class="app">
       <BaseNotificationContainer />
-      <BCGovHeader />
-      <BCGovNavBar />
+      <BCGovHeader :app-title="appTitle" :form-submit-mode="isFormSubmitMode" />
+      <BCGovNavBar :form-submit-mode="isFormSubmitMode" />
       <RouterView v-slot="{ Component }">
         <transition name="component-fade" mode="out-in">
-          <component
-            :is="Component"
-            :class="[isWideLayout && isValidRoute ? 'main-wide' : 'main']"
-          />
+          <component :is="Component" :class="isWidePage" />
         </transition>
       </RouterView>
-      <BCGovFooter />
+      <BCGovFooter :form-submit-mode="isFormSubmitMode" />
     </v-main>
   </v-layout>
 </template>

@@ -122,18 +122,21 @@ export default {
       :no-data-text="$t('trans.adminFormsTable.noDataText')"
     >
       <template #item.createdAt="{ item }">
-        {{ $filters.formatDateLong(item.raw.createdAt) }} -
-        {{ item.raw.createdBy }}
+        {{ $filters.formatDateLong(item.createdAt) }} -
+        {{ item.createdBy }}
       </template>
       <template #item.updatedAt="{ item }">
-        {{ $filters.formatDateLong(item.raw.updatedAt) }} -
-        {{ item.raw.updatedBy }}
+        {{ $filters.formatDateLong(item.updatedAt) }} -
+        {{ item.updatedBy }}
       </template>
       <template #item.actions="{ item }">
-        <router-link
-          :to="{ name: 'AdministerForm', query: { f: item.raw.id } }"
-        >
-          <v-btn color="primary" variant="text" size="small">
+        <router-link :to="{ name: 'AdministerForm', query: { f: item.id } }">
+          <v-btn
+            color="primary"
+            variant="text"
+            size="small"
+            :title="$t('trans.adminFormsTable.admin')"
+          >
             <v-icon class="mr-1" icon="mdi:mdi-wrench"></v-icon>
             <span class="d-none d-sm-flex" :lang="lang">{{
               $t('trans.adminFormsTable.admin')
@@ -144,11 +147,16 @@ export default {
         <router-link
           :to="{
             name: 'FormSubmit',
-            query: { f: item.raw.id },
+            query: { f: item.id },
           }"
           target="_blank"
         >
-          <v-btn color="primary" variant="text" size="small">
+          <v-btn
+            color="primary"
+            variant="text"
+            size="small"
+            :title="$t('trans.adminFormsTable.launch')"
+          >
             <v-icon class="mr-1" icon="mdi:mdi-note-plus"></v-icon>
             <span class="d-none d-sm-flex" :lang="lang">{{
               $t('trans.adminFormsTable.launch')

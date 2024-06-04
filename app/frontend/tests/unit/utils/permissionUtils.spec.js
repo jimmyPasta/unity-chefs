@@ -5,11 +5,7 @@ import { formService } from '~/services';
 import { useAuthStore } from '~/store/auth';
 import { useIdpStore } from '~/store/identityProviders';
 import { useNotificationStore } from '~/store/notification';
-import {
-  FormPermissions,
-  IdentityProviders,
-  IdentityMode,
-} from '~/utils/constants';
+import { FormPermissions, IdentityMode } from '~/utils/constants';
 import * as permissionUtils from '~/utils/permissionUtils';
 
 describe('checkFormSubmit', () => {
@@ -96,6 +92,30 @@ describe('checkSubmissionView', () => {
     ).toBeTruthy();
     expect(
       permissionUtils.checkSubmissionView([FormPermissions.SUBMISSION_UPDATE])
+    ).toBeTruthy();
+  });
+});
+
+describe('checkSubmissionUpdate', () => {
+  it('should be false when permissions is undefined', () => {
+    expect(permissionUtils.checkSubmissionUpdate(undefined)).toBeFalsy();
+  });
+
+  it('should be false when permissions is empty', () => {
+    expect(permissionUtils.checkSubmissionUpdate([])).toBeFalsy();
+  });
+
+  it('should be false when no appropriate permission exists', () => {
+    let permissions = new Array(FormPermissions)
+      .filter((p) => p !== FormPermissions.SUBMISSION_READ)
+      .filter((p) => p !== FormPermissions.SUBMISSION_REVIEW);
+
+    expect(permissionUtils.checkSubmissionUpdate(permissions)).not.toBeTruthy();
+  });
+
+  it('should be true when at least one appropriate permission exists', () => {
+    expect(
+      permissionUtils.checkSubmissionUpdate([FormPermissions.SUBMISSION_UPDATE])
     ).toBeTruthy();
   });
 });

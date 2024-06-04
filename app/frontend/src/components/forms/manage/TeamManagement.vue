@@ -70,7 +70,7 @@ export default {
         { title: i18n.t('trans.teamManagement.username'), key: 'username' },
         {
           title: i18n.t('trans.teamManagement.identityProvider'),
-          key: 'identityProvider',
+          key: 'identityProvider.code',
         },
       ];
       return headers
@@ -105,7 +105,7 @@ export default {
       if (this.filterData.length > 0) {
         headers = headers.filter(
           (h) =>
-            this.filterData.some((fd) => fd.key === h.key) ||
+            this.filterData.some((fd) => fd === h.key) ||
             this.filterIgnore.some((ign) => ign.key === h.key)
         );
       }
@@ -113,7 +113,7 @@ export default {
     },
     PRESELECTED_DATA() {
       return this.filterData.length === 0
-        ? this.FILTER_HEADERS
+        ? this.FILTER_HEADERS.map((fd) => fd.key)
         : this.filterData;
     },
   },
@@ -186,7 +186,7 @@ export default {
           fullName: user.fullName,
           userId: user.userId,
           username: user.username,
-          identityProvider: user.idp?.code,
+          identityProvider: user.idp,
         };
         this.roleList
           .map((role) => role.code)
@@ -207,10 +207,10 @@ export default {
     },
 
     async toggleRole(user) {
-      await this.setUserForms(user.raw.id, {
-        formId: user.raw.formId,
-        ...user.columns,
-        userId: user.raw.id,
+      await this.setUserForms(user.id, {
+        formId: user.formId,
+        ...user,
+        userId: user.id,
       });
       this.selectedUsers = [];
     },
@@ -281,6 +281,10 @@ export default {
               form_designer:
                 Array.isArray(roles) && roles.length
                   ? roles.includes(FormRoleCodes.FORM_DESIGNER)
+                  : false,
+              submission_approver:
+                Array.isArray(roles) && roles.length
+                  ? roles.includes(FormRoleCodes.SUBMISSION_APPROVER)
                   : false,
               submission_reviewer:
                 Array.isArray(roles) && roles.length
@@ -409,6 +413,7 @@ export default {
                 icon
                 size="x-small"
                 v-bind="props"
+                :title="$t('trans.teamManagement.selectColumns')"
                 @click="onShowColumnDialog"
               >
                 <v-icon icon="mdi:mdi-view-column"></v-icon>
@@ -428,6 +433,7 @@ export default {
                   icon
                   size="x-small"
                   v-bind="props"
+                  :title="$t('trans.teamManagement.manageForm')"
                 >
                   <v-icon icon="mdi:mdi-cog"></v-icon>
                 </v-btn>
@@ -480,7 +486,7 @@ export default {
       :lang="lang"
     >
       <!-- custom header markup - add tooltip to heading that are roles -->
-      <template #column.form_designer="{ column }">
+      <template #header.form_designer="{ column }">
         <v-tooltip v-if="roleOrder.includes(column.key)" location="bottom">
           <template #activator="{ props }">
             <span v-bind="props">{{ column.title }}</span>
@@ -489,7 +495,7 @@ export default {
         </v-tooltip>
         <span v-else>{{ column.title }}</span>
       </template>
-      <template #column.owner="{ column }">
+      <template #header.owner="{ column }">
         <v-tooltip v-if="roleOrder.includes(column.key)" location="bottom">
           <template #activator="{ props }">
             <span v-bind="props">{{ column.title }}</span>
@@ -498,7 +504,7 @@ export default {
         </v-tooltip>
         <span v-else>{{ column.title }}</span>
       </template>
-      <template #column.submission_reviewer="{ column }">
+      <template #header.submission_approver="{ column }">
         <v-tooltip v-if="roleOrder.includes(column.key)" location="bottom">
           <template #activator="{ props }">
             <span v-bind="props">{{ column.title }}</span>
@@ -507,7 +513,7 @@ export default {
         </v-tooltip>
         <span v-else>{{ column.title }}</span>
       </template>
-      <template #column.form_submitter="{ column }">
+      <template #header.submission_reviewer="{ column }">
         <v-tooltip v-if="roleOrder.includes(column.key)" location="bottom">
           <template #activator="{ props }">
             <span v-bind="props">{{ column.title }}</span>
@@ -516,7 +522,7 @@ export default {
         </v-tooltip>
         <span v-else>{{ column.title }}</span>
       </template>
-      <template #column.team_manager="{ column }">
+      <template #header.form_submitter="{ column }">
         <v-tooltip v-if="roleOrder.includes(column.key)" location="bottom">
           <template #activator="{ props }">
             <span v-bind="props">{{ column.title }}</span>
@@ -525,7 +531,16 @@ export default {
         </v-tooltip>
         <span v-else>{{ column.title }}</span>
       </template>
-      <template #column.actions>
+      <template #header.team_manager="{ column }">
+        <v-tooltip v-if="roleOrder.includes(column.key)" location="bottom">
+          <template #activator="{ props }">
+            <span v-bind="props">{{ column.title }}</span>
+          </template>
+          <span>{{ column.description }}</span>
+        </v-tooltip>
+        <span v-else>{{ column.title }}</span>
+      </template>
+      <template #header.actions>
         <v-tooltip location="bottom">
           <template #activator="{ props }">
             <v-btn
@@ -534,6 +549,7 @@ export default {
               :disabled="updating || selectedUsers.length < 1"
               size="24"
               color="red"
+              :title="$t('trans.teamManagement.removeSelectedUsers')"
               @click="onRemoveClick(selectedUsers)"
             >
               <v-icon
@@ -552,7 +568,7 @@ export default {
         <v-checkbox-btn
           v-if="!disableRole('form_designer', item, form.userType)"
           key="form_designer"
-          v-model="item.columns.form_designer"
+          v-model="item.form_designer"
           v-ripple
           :disabled="updating"
           @update:modelValue="toggleRole(item)"
@@ -562,7 +578,17 @@ export default {
         <v-checkbox-btn
           v-if="!disableRole('owner', item, form.userType)"
           key="owner"
-          v-model="item.columns.owner"
+          v-model="item.owner"
+          v-ripple
+          :disabled="updating"
+          @update:modelValue="toggleRole(item)"
+        ></v-checkbox-btn>
+      </template>
+      <template #item.submission_approver="{ item }">
+        <v-checkbox-btn
+          v-if="!disableRole('submission_approver', item, form.userType)"
+          key="submission_approver"
+          v-model="item.submission_approver"
           v-ripple
           :disabled="updating"
           @update:modelValue="toggleRole(item)"
@@ -572,7 +598,7 @@ export default {
         <v-checkbox-btn
           v-if="!disableRole('submission_reviewer', item, form.userType)"
           key="submission_reviewer"
-          v-model="item.columns.submission_reviewer"
+          v-model="item.submission_reviewer"
           v-ripple
           :disabled="updating"
           @update:modelValue="toggleRole(item)"
@@ -582,7 +608,7 @@ export default {
         <v-checkbox-btn
           v-if="!disableRole('form_submitter', item, form.userType)"
           key="form_submitter"
-          v-model="item.columns.form_submitter"
+          v-model="item.form_submitter"
           v-ripple
           :disabled="updating"
           @update:modelValue="toggleRole(item)"
@@ -592,7 +618,7 @@ export default {
         <v-checkbox-btn
           v-if="!disableRole('team_manager', item, form.userType)"
           key="team_manager"
-          v-model="item.columns.team_manager"
+          v-model="item.team_manager"
           v-ripple
           :disabled="updating"
           @update:modelValue="toggleRole(item)"
@@ -607,7 +633,8 @@ export default {
               :disabled="updating"
               size="24"
               color="red"
-              @click="onRemoveClick(item.raw)"
+              :title="$t('trans.teamManagement.removeThisUser')"
+              @click="onRemoveClick(item)"
             >
               <v-icon
                 size="16"
@@ -650,7 +677,7 @@ export default {
         input-item-key="key"
         :input-save-button-text="$t('trans.teamManagement.save')"
         :input-data="FILTER_HEADERS"
-        :reset-data="FILTER_HEADERS"
+        :reset-data="FILTER_HEADERS.map((h) => h.key)"
         :preselected-data="PRESELECTED_DATA"
         @saving-filter-data="updateFilter"
         @cancel-filter-data="showColumnsDialog = false"

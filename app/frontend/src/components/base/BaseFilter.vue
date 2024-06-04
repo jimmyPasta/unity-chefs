@@ -1,81 +1,86 @@
-<script>
+<script setup>
 import { i18n } from '~/internationalization';
-import { mapState } from 'pinia';
+import { storeToRefs } from 'pinia';
 
 import { useFormStore } from '~/store/form';
+import { ref } from 'vue';
+import { computed, onMounted } from 'vue';
 
-export default {
-  props: {
-    inputHeaders: {
-      type: Array,
-      default: () => [
-        {
-          title: i18n.t('trans.baseFilter.columnName'),
-          align: 'start',
-          sortable: true,
-          key: 'title',
-        },
-      ],
-    },
-    // The data you will be filtering with
-    inputData: {
-      type: Array,
-      default: () => [
-        { title: i18n.t('trans.baseFilter.exampleText'), key: 'exampleText1' },
-        { title: i18n.t('trans.baseFilter.exampleText2'), key: 'exampleText2' },
-      ],
-    },
-    resetData: {
-      type: Array,
-      default: () => [],
-    },
-    // The default selected data
-    preselectedData: {
-      type: Array,
-      default: () => [],
-    },
-    inputItemKey: {
-      type: String,
-      default: 'key',
-    },
-    inputFilterLabel: {
-      type: String,
-      default: '',
-    },
-    inputFilterPlaceholder: {
-      type: String,
-      default: i18n.t('trans.baseFilter.exampleText2'),
-    },
-    inputSaveButtonText: {
-      type: String,
-      default: i18n.t('trans.baseFilter.filter'),
-    },
+const properties = defineProps({
+  inputHeaders: {
+    type: Array,
+    default: () => [
+      {
+        title: i18n.t('trans.baseFilter.columnName'),
+        align: 'start',
+        sortable: true,
+        key: 'title',
+      },
+    ],
   },
-  emits: ['saving-filter-data', 'cancel-filter-data'],
-  data() {
-    return {
-      selectedData: this.preselectedData,
-      inputFilter: '',
-    };
+  // The data you will be filtering with
+  inputData: {
+    type: Array,
+    default: () => [
+      { title: i18n.t('trans.baseFilter.exampleText'), key: 'exampleText1' },
+      { title: i18n.t('trans.baseFilter.exampleText2'), key: 'exampleText2' },
+    ],
   },
-  computed: {
-    ...mapState(useFormStore, ['isRTL', 'lang']),
+  resetData: {
+    type: Array,
+    default: () => [],
   },
-  methods: {
-    savingFilterData() {
-      this.inputFilter = '';
-      this.$emit('saving-filter-data', this.selectedData);
-    },
-    onResetColumns() {
-      this.selectedData = this.resetData;
-      this.inputFilter = '';
-    },
-    cancelFilterData() {
-      (this.selectedData = this.preselectedData),
-        this.$emit('cancel-filter-data');
-    },
+  // The default selected data
+  preselectedData: {
+    type: Array,
+    default: () => [],
   },
-};
+  inputItemKey: {
+    type: String,
+    default: 'key',
+  },
+  inputFilterLabel: {
+    type: String,
+    default: '',
+  },
+  inputFilterPlaceholder: {
+    type: String,
+    default: i18n.t('trans.baseFilter.exampleText2'),
+  },
+  inputSaveButtonText: {
+    type: String,
+    default: i18n.t('trans.baseFilter.filter'),
+  },
+});
+
+const emit = defineEmits(['saving-filter-data', 'cancel-filter-data']);
+
+const selectedData = ref([]);
+const inputFilter = ref('');
+
+const { isRTL, lang } = storeToRefs(useFormStore());
+
+const RTL = computed(() => (isRTL.value ? 'ml-3' : 'mr-3'));
+
+function savingFilterData() {
+  inputFilter.value = '';
+  emit('saving-filter-data', selectedData.value);
+}
+
+function onResetColumns() {
+  selectedData.value = properties.resetData;
+  inputFilter.value = '';
+}
+
+function cancelFilterData() {
+  (selectedData.value = properties.preselectedData), emit('cancel-filter-data');
+}
+
+onMounted(() => {
+  selectedData.value = Object.freeze(properties.preselectedData);
+});
+
+defineExpose({ selectedData, inputFilter });
 </script>
 
 <template>
@@ -108,10 +113,12 @@ export default {
         <v-tooltip location="bottom">
           <template #activator="{ props }">
             <v-btn
+              data-test="reset-columns-btn"
               color="primary"
               class="mx-1 align-self-center mb-3"
               icon
               v-bind="props"
+              :title="$t('trans.baseFilter.resetColumns')"
               @click="onResetColumns"
             >
               <v-icon
@@ -138,7 +145,6 @@ export default {
         :search="inputFilter"
         class="bg-grey-lighten-5 mb-3"
         disable-pagination
-        return-object
         :lang="lang"
       >
       </v-data-table>
@@ -146,6 +152,7 @@ export default {
         data-test="save-btn"
         class="bg-primary mt-3"
         :lang="lang"
+        :title="inputSaveButtonText"
         @click="savingFilterData"
       >
         {{ inputSaveButtonText }}
@@ -153,9 +160,10 @@ export default {
       <v-btn
         data-test="cancel-btn"
         class="mt-3 text-primary"
-        :class="isRTL ? 'mr-3' : 'ml-3'"
+        :class="RTL"
         variant="outlined"
         :lang="lang"
+        :title="$t('trans.baseFilter.cancel')"
         @click="cancelFilterData"
         >{{ $t('trans.baseFilter.cancel') }}</v-btn
       >

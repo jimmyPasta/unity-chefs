@@ -12,6 +12,9 @@ import {
 //
 // Utility Functions for determining permissions
 //
+export function isIdpEnabled(idps, type) {
+  return idps ? idps.includes(type) : false;
+}
 
 /**
  * @function checkFormSubmit
@@ -50,6 +53,18 @@ export function checkSubmissionView(permissions) {
     FormPermissions.SUBMISSION_READ,
     FormPermissions.SUBMISSION_UPDATE,
   ];
+
+  return permissions && permissions.some((p) => perms.includes(p));
+}
+
+/**
+ * @function checkSubmissionUpdate
+ * Returns true if the user can update submissions of a form, false otherwise
+ * @param {Array} permissions A form's permissions array for the rbac user
+ * @returns {boolean} TRUE if they can
+ */
+export function checkSubmissionUpdate(permissions) {
+  const perms = [FormPermissions.SUBMISSION_UPDATE];
 
   return permissions && permissions.some((p) => perms.includes(p));
 }

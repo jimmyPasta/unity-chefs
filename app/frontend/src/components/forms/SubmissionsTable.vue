@@ -215,7 +215,7 @@ export default {
         headers = headers.filter(
           (h) =>
             // It must be in the user preferences
-            this.USER_PREFERENCES.some((up) => up.key === h.key) ||
+            this.USER_PREFERENCES.some((up) => up === h.key) ||
             // except if it's in the filter ignore
             this.filterIgnore.some((fd) => fd.key === h.key)
         );
@@ -261,35 +261,7 @@ export default {
     USER_PREFERENCES() {
       let preselectedData = [];
       if (this.userFormPreferences?.preferences?.columns) {
-        preselectedData = this.userFormPreferences.preferences.columns.map(
-          (column) => {
-            if (column === 'date') {
-              return {
-                title: this.$t('trans.submissionsTable.submissionDate'),
-                align: 'start',
-                key: 'date',
-              };
-            } else if (column === 'submitter') {
-              return {
-                title: this.$t('trans.submissionsTable.submitter'),
-                align: 'start',
-                key: 'submitter',
-              };
-            } else if (column === 'status') {
-              return {
-                title: this.$t('trans.submissionsTable.status'),
-                align: 'start',
-                key: 'status',
-              };
-            } else {
-              return {
-                align: 'start',
-                title: column,
-                key: column,
-              };
-            }
-          }
-        );
+        preselectedData = this.userFormPreferences.preferences.columns;
       }
       return preselectedData;
     },
@@ -313,14 +285,16 @@ export default {
       let headers = this.BASE_FILTER_HEADERS;
       // Remove the form fields because this is the default view
       // we don't need all the form fields
-      headers = headers.filter((header) => {
-        // we want columns that aren't form fields
-        return (
-          !this.formFields.includes(header.key) &&
-          // These values won't be preselected
-          !this.tableFilterIgnore.some((fi) => fi.key === header.key)
-        );
-      });
+      headers = headers
+        .filter((header) => {
+          // we want columns that aren't form fields
+          return (
+            !this.formFields.includes(header.key) &&
+            // These values won't be preselected
+            !this.tableFilterIgnore.some((fi) => fi.key === header.key)
+          );
+        })
+        .map((h) => h.key);
       return headers;
     },
     // These are the columns that will be selected by default when the
@@ -557,7 +531,7 @@ export default {
         columns: [],
       };
       data.forEach((d) => {
-        preferences.columns.push(d.key);
+        preferences.columns.push(d);
       });
 
       await this.updateFormPreferencesForCurrentUser({
@@ -600,6 +574,7 @@ export default {
                 size="x-small"
                 density="default"
                 icon="mdi:mdi-view-column"
+                :title="$t('trans.submissionsTable.selectColumns')"
                 @click="onShowColumnDialog"
               />
             </template>
@@ -618,6 +593,7 @@ export default {
                   size="x-small"
                   density="default"
                   icon="mdi:mdi-cog"
+                  :title="$t('trans.submissionsTable.manageForm')"
                 />
               </router-link>
             </template>
@@ -637,6 +613,7 @@ export default {
                   size="x-small"
                   density="default"
                   icon="mdi:mdi-download"
+                  :title="$t('trans.submissionsTable.submissionsToFiles')"
                 />
               </router-link>
             </template>
@@ -721,13 +698,14 @@ export default {
       return-object
       @update:options="updateTableOptions"
     >
-      <template #column.event>
+      <template #header.event>
         <span v-if="!deletedOnly">
           <v-btn
             color="red"
             :disabled="selectedSubmissions.length === 0"
             icon="mdi:mdi-minus"
             size="x-small"
+            :title="$t('trans.submissionsTable.delSelectedSubmissions')"
             @click="(showDeleteDialog = true), (singleSubmissionDelete = false)"
           >
             <v-tooltip location="bottom">
@@ -745,6 +723,7 @@ export default {
             :disabled="selectedSubmissions.length === 0"
             icon
             size="x-small"
+            :title="$t('trans.submissionsTable.resSelectedSubmissions')"
             @click="
               (showRestoreDialog = true), (singleSubmissionRestore = false)
             "
@@ -768,10 +747,10 @@ export default {
       </template>
 
       <template #item.date="{ item }">
-        {{ $filters.formatDateLong(item.columns.date) }}
+        {{ $filters.formatDateLong(item.date) }}
       </template>
       <template #item.status="{ item }">
-        {{ item.columns.status }}
+        {{ item.status }}
       </template>
       <template #item.lateEntry="{ item }">
         <span :lang="lang">
@@ -789,11 +768,17 @@ export default {
               :to="{
                 name: 'FormView',
                 query: {
-                  s: item.raw.submissionId,
+                  s: item.submissionId,
                 },
               }"
             >
-              <v-btn color="primary" icon size="x-small" v-bind="props">
+              <v-btn
+                color="primary"
+                icon
+                size="x-small"
+                v-bind="props"
+                :title="$t('trans.submissionsTable.viewSubmission')"
+              >
                 <v-icon icon="mdi:mdi-eye"></v-icon>
               </v-btn>
             </router-link>
@@ -805,16 +790,17 @@ export default {
       </template>
       <template #item.event="{ item }">
         <span>
-          <v-tooltip v-if="!item.raw.deleted" location="bottom">
+          <v-tooltip v-if="!item.deleted" location="bottom">
             <template #activator="{ props }">
               <v-btn
                 color="red"
                 icon
                 size="x-small"
                 v-bind="props"
+                :title="$t('trans.submissionsTable.deleteSubmission')"
                 @click="
                   (showDeleteDialog = true),
-                    (deleteItem = item.raw),
+                    (deleteItem = item),
                     (singleSubmissionDelete = true)
                 "
               >
@@ -826,15 +812,16 @@ export default {
             }}</span>
           </v-tooltip>
         </span>
-        <span v-if="item.raw.deleted">
+        <span v-if="item.deleted">
           <v-tooltip location="bottom">
             <template #activator="{ props }">
               <v-btn
                 icon
                 size="x-small"
                 v-bind="props"
+                :title="$t('trans.submissionsTable.restore')"
                 @click="
-                  restoreItem = item.raw;
+                  restoreItem = item;
                   showRestoreDialog = true;
                   singleSubmissionRestore = true;
                 "
@@ -890,10 +877,10 @@ export default {
         :input-filter-placeholder="
           $t('trans.submissionsTable.searchSubmissionFields')
         "
-        :input-save-button-text="$t('trans.submissionsTable.save')"
         :input-data="BASE_FILTER_HEADERS"
-        :preselected-data="PRESELECTED_DATA"
+        :preselected-data="PRESELECTED_DATA.map((pd) => pd.key)"
         :reset-data="RESET_HEADERS"
+        :input-save-button-text="$t('trans.submissionsTable.save')"
         @saving-filter-data="updateFilter"
         @cancel-filter-data="showColumnsDialog = false"
       >

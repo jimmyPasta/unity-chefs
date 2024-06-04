@@ -92,13 +92,16 @@ export default {
       :lang="lang"
     >
       <template #item.created="{ item }">
-        {{ $filters.formatDate(item.raw.createdAt) }}
+        {{ $filters.formatDate(item.createdAt) }}
       </template>
       <template #item.actions="{ item }">
-        <router-link
-          :to="{ name: 'AdministerUser', query: { u: item.raw.id } }"
-        >
-          <v-btn color="primary" variant="text" size="small">
+        <router-link :to="{ name: 'AdministerUser', query: { u: item.id } }">
+          <v-btn
+            color="primary"
+            variant="text"
+            size="small"
+            :title="$t('trans.adminUsersTable.admin')"
+          >
             <v-icon class="mr-1" icon="mdi:mdi-wrench"></v-icon>
             <span class="d-none d-sm-flex" :lang="lang">{{
               $t('trans.adminUsersTable.admin')

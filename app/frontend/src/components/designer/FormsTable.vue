@@ -96,6 +96,7 @@ export default {
                 icon="mdi-plus"
                 role="link"
                 size="x-small"
+                :title="$t('trans.formsTable.createNewForm')"
                 @click="navigate"
               >
               </v-btn>
@@ -142,16 +143,16 @@ export default {
   >
     <template #item.name="{ item }">
       <router-link
-        v-if="item.raw.published"
+        v-if="item.published"
         :to="{
           name: 'FormSubmit',
-          query: { f: item.raw.id },
+          query: { f: item.id },
         }"
         target="_blank"
       >
         <v-tooltip location="bottom">
           <template #activator="{ props }">
-            <span v-bind="props">{{ item.columns.name }}</span>
+            <span v-bind="props">{{ item.name }}</span>
           </template>
           <span :lang="lang">
             {{ $t('trans.formsTable.viewForm') }}
@@ -159,23 +160,28 @@ export default {
           </span>
         </v-tooltip>
       </router-link>
-      <span v-else>{{ item.columns.name }}</span>
+      <span v-else>{{ item.name }}</span>
       <v-icon
-        v-if="item.raw.description?.trim()"
+        v-if="item.description?.trim()"
         size="small"
         class="description-icon ml-2 mr-4"
         color="primary"
         icon="mdi:mdi-note-text"
         :aria-label="$t('trans.formsTable.description')"
-        @click="onDescriptionClick(item.raw.id, item.raw.description)"
+        @click="onDescriptionClick(item.id, item.description)"
       ></v-icon>
     </template>
     <template #item.actions="{ item }">
       <router-link
-        v-if="checkFormManage(item.raw.permissions)"
-        :to="{ name: 'FormManage', query: { f: item.raw.id } }"
+        v-if="checkFormManage(item.permissions)"
+        :to="{ name: 'FormManage', query: { f: item.id } }"
       >
-        <v-btn color="primary" variant="text" size="small">
+        <v-btn
+          color="primary"
+          variant="text"
+          size="small"
+          :title="$t('trans.formsTable.manage')"
+        >
           <v-icon :class="isRTL ? 'ml-1' : 'mr-1'" icon="mdi:mdi-cog"></v-icon>
           <span class="d-none d-sm-flex" :lang="lang">{{
             $t('trans.formsTable.manage')
@@ -183,11 +189,16 @@ export default {
         </v-btn>
       </router-link>
       <router-link
-        v-if="checkSubmissionView(item.raw.permissions)"
+        v-if="checkSubmissionView(item.permissions)"
         data-cy="formSubmissionsLink"
-        :to="{ name: 'FormSubmissions', query: { f: item.raw.id } }"
+        :to="{ name: 'FormSubmissions', query: { f: item.id } }"
       >
-        <v-btn color="primary" variant="text" size="small">
+        <v-btn
+          color="primary"
+          variant="text"
+          size="small"
+          :title="$t('trans.formsTable.submissions')"
+        >
           <v-icon
             :class="isRTL ? 'ml-1' : 'mr-1'"
             icon="mdi:mdi-list-box-outline"

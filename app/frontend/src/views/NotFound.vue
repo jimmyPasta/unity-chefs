@@ -1,20 +1,16 @@
-<script>
-import { mapState } from 'pinia';
+<script setup>
+import { storeToRefs } from 'pinia';
 
 import { useFormStore } from '~/store/form';
 
-export default {
-  computed: {
-    ...mapState(useFormStore, ['lang']),
-  },
-};
+const { lang } = storeToRefs(useFormStore());
 </script>
 
 <template>
   <v-container class="text-center">
     <h1 class="my-6" :lang="lang">{{ $t('trans.notFound.pageNotFound') }}</h1>
     <router-link :to="{ name: 'About' }">
-      <v-btn color="primary" size="large">
+      <v-btn color="primary" size="large" :title="$t('trans.notFound.about')">
         <v-icon start icon="mdi-home"></v-icon>
         <span :lang="lang">{{ $t('trans.notFound.about') }}</span>
       </v-btn>

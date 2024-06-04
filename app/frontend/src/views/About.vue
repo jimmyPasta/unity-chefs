@@ -1,24 +1,17 @@
-<script>
-import { mapState } from 'pinia';
-import BaseImagePopout from '../components/base/BaseImagePopout.vue';
+<script setup>
 import { useAuthStore } from '~/store/auth';
 import { useFormStore } from '~/store/form';
+import { computed } from 'vue';
+import { storeToRefs } from 'pinia';
 
-export default {
-  components: {
-    BaseImagePopout,
-  },
-  computed: {
-    ...mapState(useAuthStore, ['authenticated']),
-    ...mapState(useFormStore, ['isRTL', 'lang']),
-    howToVideoUrl() {
-      return import.meta.env.VITE_HOWTOURL;
-    },
-    chefsTourVideoUrl() {
-      return import.meta.env.VITE_CHEFSTOURURL;
-    },
-  },
-};
+const authStore = useAuthStore();
+const formStore = useFormStore();
+
+const { authenticated } = storeToRefs(authStore);
+const { isRTL, lang } = storeToRefs(formStore);
+
+const howToVideoUrl = computed(() => import.meta.env.VITE_HOWTOURL);
+const chefsTourVideoUrl = computed(() => import.meta.env.VITE_CHEFSTOURURL);
 </script>
 
 <template>
@@ -26,26 +19,31 @@ export default {
     <v-sheet class="help-highlight pa-5 text-center">
       <v-row justify="center">
         <v-col lg="8">
-          <h1 class="my-5 d-block" locale="lang">
+          <h1 class="my-5 d-block" :locale="lang">
             {{ $t('trans.homePage.title') }}
           </h1>
-          <p locale="lang">{{ $t('trans.homePage.subTitle') }}<br /></p>
+          <p :locale="lang">{{ $t('trans.homePage.subTitle') }}<br /></p>
 
           <v-btn
             :to="{ name: 'FormCreate' }"
             class="mb-5"
             color="primary"
             data-test="create-or-login-btn"
+            :title="
+              authenticated
+                ? $t('trans.homePage.loginToStart')
+                : $t('trans.homePage.createFormLabel')
+            "
           >
-            <span v-if="!authenticated" locale="lang">{{
+            <span v-if="!authenticated" :locale="lang">{{
               $t('trans.homePage.loginToStart')
             }}</span>
-            <span v-else locale="lang">{{
+            <span v-else :locale="lang">{{
               $t('trans.homePage.createFormLabel')
             }}</span>
           </v-btn>
 
-          <h2 id="video" class="pt-5" locale="lang">
+          <h2 id="video" class="pt-5" :locale="lang">
             {{ $t('trans.homePage.takeATourOfChefs') }}
           </h2>
           <div class="video-wrapper">
@@ -135,7 +133,16 @@ export default {
           <p :lang="lang">
             {{ $t('trans.homePage.createOnlineTitle') }}
           </p>
-          <v-btn :to="{ name: 'FormCreate' }" class="mb-5" color="primary">
+          <v-btn
+            :to="{ name: 'FormCreate' }"
+            class="mb-5"
+            color="primary"
+            :title="
+              authenticated
+                ? $t('trans.shareForm.shareForm')
+                : $t('trans.homePage.createFormLabel')
+            "
+          >
             <span v-if="!authenticated" :lang="lang">{{
               $t('trans.homePage.logInToGetStarted')
             }}</span>
